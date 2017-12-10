@@ -17,7 +17,7 @@ Thus here are a few features that are supported:
 - Sanity check of any tree to a limited number of generations up to 19 generations, or an infinite number of generations. 
   Note that this can take quite some time if running against a web tree and many generations are selected.
 
-For updates, see http://endian.net/FamilyStudio/FamilyStudio_v09xx.exe 
+For a ready-built version, see http://endian.net/FamilyStudio/publish.htm
 
 Todo: It doesn't have that great support for presenting trees in different forms, etc..
 
