@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4411D6E4-243D-4CB2-BB25-89A4449DECD1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FamilyStudioConfiguration</RootNamespace>
+    <AssemblyName>FamilyStudioConfiguration</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FamilyFileFormat\FamilyFileTypeCollection.cs" />
+    <Compile Include="FamilyFileFormat\FamilyTreeStoreRam.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="XmlCodec\XmlEncoder.cs" />
+    <Compile Include="XmlCodec\XmlFileType.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FamilyStudioData\FamilyStudioData.csproj">
+      <Project>{911d2075-8f1c-43df-9892-e71d139e4259}</Project>
+      <Name>FamilyStudioData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FileFormats\AnarkivCodec\AnarkivCodec.csproj">
+      <Project>{728ddf5d-b15e-4b9e-bfe8-ea7c8ba85f2c}</Project>
+      <Name>AnarkivCodec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FileFormats\GedcomCodec\GedcomCodec.csproj">
+      <Project>{27f035d7-3604-46a1-acab-fff1beb37315}</Project>
+      <Name>GedcomCodec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FileFormats\GeniCodec\GeniCodec.csproj">
+      <Project>{39b21cc8-5541-4226-a458-c99d8ca25539}</Project>
+      <Name>GeniCodec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FileFormats\MyHeritageCodec\MyHeritageCodec.csproj">
+      <Project>{23aac4c9-53f3-4e80-9a45-19cabed3f7fa}</Project>
+      <Name>MyHeritageCodec</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FileFormats\TextCodec\TextCodec.csproj">
+      <Project>{9710bbfe-1cf6-4657-b6c9-64937aa624b0}</Project>
+      <Name>TextCodec</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

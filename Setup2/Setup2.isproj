@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup>
+		<!-- Select a Product Configuration -->
+		<InstallShieldProductConfiguration>Express</InstallShieldProductConfiguration>
+		<!-- Select a Visual Studio Configuration / InstallShield Release -->
+		<Configuration>Debug</Configuration>
+		<InstallShieldRelease>$(Configuration)</InstallShieldRelease>
+	</PropertyGroup>
+	<ItemGroup>
+		<!-- The InstallShieldProject item selects the project to build -->
+		<InstallShieldProject Include="$(MSBuildProjectDirectory)\$(MSBuildProjectName).isl"/>
+		<!-- The InstallShieldReleaseFlags sets Release Flags -->
+		<!--<InstallShieldReleaseFlags Include=""/>-->
+		<!-- The InstallShieldMergeModulePath specifies what directories are
+		searched for Merge Modules -->
+		<!--<InstallShieldMergeModulePath Include=""/>-->
+	</ItemGroup>
+	<ItemGroup>
+		<!-- The ProjectReference items refer to any Visual Studio solutions you want to automatically probe for Project Output Groups.  -->
+	</ItemGroup>
+	<ItemGroup>
+		<!-- The TaggedOutputs items allow you to explicitly add extra files to output groups. Each item must include both Name and OutputGroup, as well as TargetPath metadata values. -->
+		<!--<TaggedOutputs Include="C:\My Test Exe.exe">
+			<Name>My Test Project</Name>
+			<OutputGroup>Primary output</OutputGroup>
+			<TargetPath>My Test Exe.exe</TargetPath>
+		</TaggedOutputs> -->
+	</ItemGroup>
+	<Import Project="$(MSBuildExtensionsPath32)\InstallShield\2013Limited\InstallShield.targets"/>
+	<ItemGroup>
+		<ProjectReference Include="..\FileFormats\AnarkivCodec\AnarkivCodec.csproj">
+			<Name>AnarkivCodec</Name>
+			<Project>{728DDF5D-B15E-4B9E-BFE8-EA7C8BA85F2C}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FamilyStudio1\FamilyStudio2.csproj">
+			<Name>FamilyStudio2</Name>
+			<Project>{FA4A13F5-5D65-4F31-A56A-8F46D6184538}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FamilyStudioConfiguration\FamilyStudioConfiguration.csproj">
+			<Name>FamilyStudioConfiguration</Name>
+			<Project>{4411D6E4-243D-4CB2-BB25-89A4449DECD1}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FamilyStudioData\FamilyStudioData.csproj">
+			<Name>FamilyStudioData</Name>
+			<Project>{911D2075-8F1C-43DF-9892-E71D139E4259}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FamilyStudioFormsGui\FamilyStudioFormsGui.csproj">
+			<Name>FamilyStudioFormsGui</Name>
+			<Project>{94FFC2A3-7686-4E99-87B4-98535F20C02C}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FamilyStudioWebBrowser\FamilyStudioWebBrowser.csproj">
+			<Name>FamilyStudioWebBrowser</Name>
+			<Project>{27DA93BC-2FE0-45CF-A69D-C30662FBAE13}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FileFormats\GedcomCodec\GedcomCodec.csproj">
+			<Name>GedcomCodec</Name>
+			<Project>{27F035D7-3604-46A1-ACAB-FFF1BEB37315}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FileFormats\GeniCodec\GeniCodec.csproj">
+			<Name>GeniCodec</Name>
+			<Project>{39B21CC8-5541-4226-A458-C99D8CA25539}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FileFormats\MyHeritageCodec\MyHeritageCodec.csproj">
+			<Name>MyHeritageCodec</Name>
+			<Project>{23AAC4C9-53F3-4E80-9A45-19CABED3F7FA}</Project>
+		</ProjectReference>
+		<ProjectReference Include="..\FileFormats\TextCodec\TextCodec.csproj">
+			<Name>TextCodec</Name>
+			<Project>{9710BBFE-1CF6-4657-B6C9-64937AA624B0}</Project>
+		</ProjectReference>
+	</ItemGroup>
+</Project>

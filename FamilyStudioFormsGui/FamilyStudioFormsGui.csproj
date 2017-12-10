@@ -1,0 +1,230 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{94FFC2A3-7686-4E99-87B4-98535F20C02C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>FamilyStudioFormsGui</RootNamespace>
+    <AssemblyName>FamilyStudioFormsGui</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Controls.Ribbon" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Windows.Forms.DataVisualization.Design" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Controls\FamilyPanel_remove.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Controls\FamilyPanel2.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Controls\FamilyPanel2.Designer.cs">
+      <DependentUpon>FamilyPanel2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Controls\IndividualControl4.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\AddPersonForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\AddPersonForm.Designer.cs">
+      <DependentUpon>AddPersonForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\AsyncWorkerProgress.cs" />
+    <Compile Include="WindowsGui\Forms\CustomClass.cs" />
+    <Compile Include="WindowsGui\Forms\FamilyForm2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\FamilyForm2.Designer.cs">
+      <DependentUpon>FamilyForm2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\FamilySearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\FamilySearchForm.Designer.cs">
+      <DependentUpon>FamilySearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\FlagsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\FlagsForm.Designer.cs">
+      <DependentUpon>FlagsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\IndividualForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\IndividualForm.Designer.cs">
+      <DependentUpon>IndividualForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\MDIFamilyParent.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\MDIFamilyParent.Designer.cs">
+      <DependentUpon>MDIFamilyParent.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\TreeCompareForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Forms\TreeCompareForm.Designer.cs">
+      <DependentUpon>TreeCompareForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\AsyncTreePanel1\AsyncTreeButtons.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\ComparePanel1\ComparePanel1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\ComplenessViewPanel1\RelationFinderPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\ComplenessViewPanel1\CompletenessViewPanel1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\ComplenessViewPanel1\SanitySettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\ComplenessViewPanel1\SanitySettingsForm.Designer.cs">
+      <DependentUpon>SanitySettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\ImageViewPanels\ImageViewPanel1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\NotePanel\NotePanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\PersonViewPanel1\PersonViewPanel1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\SearchPanel\SearchPanel1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\TreeViewPanel1\IndividualControl3.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\TreeViewPanel1\IndividualControl3.Designer.cs">
+      <DependentUpon>IndividualControl3.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\TreeViewPanel1\TreeViewPanel1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\AsyncTreePanel1\AsyncTreePanel1.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\TreeViewPanel2\TreeViewPanel2.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\TreeViewPanel4\TreeViewPanel4.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\AsyncTreePanel1\TreeViewLayout.cs" />
+    <Compile Include="WindowsGui\Panels\TreeViewPanel5\TreeViewPanel5.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="WindowsGui\Panels\TreeViewPanelBaseClass.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="WindowsGui\app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Forms\AddPersonForm.resx">
+      <DependentUpon>AddPersonForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Forms\FamilyForm2.resx">
+      <DependentUpon>FamilyForm2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Forms\FamilySearchForm.resx">
+      <DependentUpon>FamilySearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Forms\FlagsForm.resx">
+      <DependentUpon>FlagsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Forms\IndividualForm.resx">
+      <DependentUpon>IndividualForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Forms\MDIFamilyParent.resx">
+      <DependentUpon>MDIFamilyParent.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Forms\TreeCompareForm.resx">
+      <DependentUpon>TreeCompareForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Panels\ComplenessViewPanel1\SanitySettingsForm.resx">
+      <DependentUpon>SanitySettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WindowsGui\Panels\TreeViewPanel1\IndividualControl3.resx">
+      <DependentUpon>IndividualControl3.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FamilyStudioConfiguration\FamilyStudioConfiguration.csproj">
+      <Project>{4411d6e4-243d-4cb2-bb25-89a4449decd1}</Project>
+      <Name>FamilyStudioConfiguration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FamilyStudioData\FamilyStudioData.csproj">
+      <Project>{911d2075-8f1c-43df-9892-e71d139e4259}</Project>
+      <Name>FamilyStudioData</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
