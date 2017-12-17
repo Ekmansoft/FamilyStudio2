@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FamilyStudio2", "FamilyStudio1\FamilyStudio2.csproj", "{FA4A13F5-5D65-4F31-A56A-8F46D6184538}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -30,43 +30,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextCodec", "FileFormats\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FamilyStudioWebBrowser", "FamilyStudioWebBrowser\FamilyStudioWebBrowser.csproj", "{27DA93BC-2FE0-45CF-A69D-C30662FBAE13}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4A69CAB5-6203-441A-963C-66F28150F7A2}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 11
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://endian.visualstudio.com/defaultcollection
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = FamilyStudio1\\FamilyStudio2.csproj
-		SccProjectName1 = FamilyStudio1
-		SccLocalPath1 = FamilyStudio1
-		SccProjectUniqueName2 = FamilyStudioConfiguration\\FamilyStudioConfiguration.csproj
-		SccProjectName2 = FamilyStudioConfiguration
-		SccLocalPath2 = FamilyStudioConfiguration
-		SccProjectUniqueName3 = FamilyStudioData\\FamilyStudioData.csproj
-		SccProjectName3 = FamilyStudioData
-		SccLocalPath3 = FamilyStudioData
-		SccProjectUniqueName4 = FamilyStudioFormsGui\\FamilyStudioFormsGui.csproj
-		SccProjectName4 = FamilyStudioFormsGui
-		SccLocalPath4 = FamilyStudioFormsGui
-		SccProjectUniqueName5 = FamilyStudioWebBrowser\\FamilyStudioWebBrowser.csproj
-		SccProjectName5 = FamilyStudioWebBrowser
-		SccLocalPath5 = FamilyStudioWebBrowser
-		SccProjectUniqueName6 = FileFormats\\AnarkivCodec\\AnarkivCodec.csproj
-		SccProjectName6 = FileFormats/AnarkivCodec
-		SccLocalPath6 = FileFormats\\AnarkivCodec
-		SccProjectUniqueName7 = FileFormats\\GedcomCodec\\GedcomCodec.csproj
-		SccProjectName7 = FileFormats/GedcomCodec
-		SccLocalPath7 = FileFormats\\GedcomCodec
-		SccProjectUniqueName8 = FileFormats\\GeniCodec\\GeniCodec.csproj
-		SccProjectName8 = FileFormats/GeniCodec
-		SccLocalPath8 = FileFormats\\GeniCodec
-		SccProjectUniqueName9 = FileFormats\\MyHeritageCodec\\MyHeritageCodec.csproj
-		SccProjectName9 = FileFormats/MyHeritageCodec
-		SccLocalPath9 = FileFormats\\MyHeritageCodec
-		SccProjectUniqueName10 = FileFormats\\TextCodec\\TextCodec.csproj
-		SccProjectName10 = FileFormats/TextCodec
-		SccLocalPath10 = FileFormats\\TextCodec
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CD_ROM|Any CPU = CD_ROM|Any CPU
 		CD_ROM|Mixed Platforms = CD_ROM|Mixed Platforms
@@ -338,5 +308,44 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DCEF97C0-370D-43ED-AEE4-1396D0F2D505}
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 11
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://endian.visualstudio.com/defaultcollection
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = FamilyStudio1\\FamilyStudio2.csproj
+		SccProjectName1 = FamilyStudio1
+		SccLocalPath1 = FamilyStudio1
+		SccProjectUniqueName2 = FamilyStudioConfiguration\\FamilyStudioConfiguration.csproj
+		SccProjectName2 = FamilyStudioConfiguration
+		SccLocalPath2 = FamilyStudioConfiguration
+		SccProjectUniqueName3 = FamilyStudioData\\FamilyStudioData.csproj
+		SccProjectName3 = FamilyStudioData
+		SccLocalPath3 = FamilyStudioData
+		SccProjectUniqueName4 = FamilyStudioFormsGui\\FamilyStudioFormsGui.csproj
+		SccProjectName4 = FamilyStudioFormsGui
+		SccLocalPath4 = FamilyStudioFormsGui
+		SccProjectUniqueName5 = FamilyStudioWebBrowser\\FamilyStudioWebBrowser.csproj
+		SccProjectName5 = FamilyStudioWebBrowser
+		SccLocalPath5 = FamilyStudioWebBrowser
+		SccProjectUniqueName6 = FileFormats\\AnarkivCodec\\AnarkivCodec.csproj
+		SccProjectName6 = FileFormats/AnarkivCodec
+		SccLocalPath6 = FileFormats\\AnarkivCodec
+		SccProjectUniqueName7 = FileFormats\\GedcomCodec\\GedcomCodec.csproj
+		SccProjectName7 = FileFormats/GedcomCodec
+		SccLocalPath7 = FileFormats\\GedcomCodec
+		SccProjectUniqueName8 = FileFormats\\GeniCodec\\GeniCodec.csproj
+		SccProjectName8 = FileFormats/GeniCodec
+		SccLocalPath8 = FileFormats\\GeniCodec
+		SccProjectUniqueName9 = FileFormats\\MyHeritageCodec\\MyHeritageCodec.csproj
+		SccProjectName9 = FileFormats/MyHeritageCodec
+		SccLocalPath9 = FileFormats\\MyHeritageCodec
+		SccProjectUniqueName10 = FileFormats\\TextCodec\\TextCodec.csproj
+		SccProjectName10 = FileFormats/TextCodec
+		SccLocalPath10 = FileFormats\\TextCodec
 	EndGlobalSection
 EndGlobal
