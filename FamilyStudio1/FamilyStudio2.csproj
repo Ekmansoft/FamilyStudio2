@@ -73,19 +73,19 @@
     <ApplicationIcon>Iconsmind-Outline-Tree.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>4B931438DD1B3FC9E4B7C1685FDA251A3EE6BEA2</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>D8C0FD4E127F636D67092742D703AFD21C67267C</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>FamilyStudio2_2_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>FamilyStudio2_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>
@@ -133,6 +133,7 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="FamilyStudio2_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\DataSources\IndividualClass.datasource" />
     <None Include="Properties\Settings.settings">
