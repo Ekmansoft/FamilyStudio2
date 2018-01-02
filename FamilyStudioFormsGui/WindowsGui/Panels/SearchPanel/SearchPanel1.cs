@@ -150,13 +150,21 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.SearchPanel1
       }
       //startButton.Enabled = false;
       //dateButton.Enabled = false;
-      resultList.Items.Clear();
 
       trace.TraceInformation("search:" + searchTextBox.Text + " " + DateTime.Now);
 
       if (searchTextBox.Text.Length > 0)
       {
         IEnumerator<IndividualClass> iterator;
+
+        resultList.Items.Clear();
+        if (searchTextBox.FindStringExact(searchTextBox.Text) == -1)
+        {
+          searchTextBox.Items.Add(searchTextBox.Text);
+        }
+        startButton.Text = "Searching...";
+        startButton.Enabled = false;
+
         searchTextBox.Items.Add(searchTextBox.Text);
 
         iterator = familyTree.SearchPerson(searchTextBox.Text);
@@ -198,6 +206,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.SearchPanel1
             }
           }
         }
+        startButton.Text = "Search";
+        startButton.Enabled = true;
       }
       trace.TraceInformation(" Database: " + familyTree.GetSourceFileName() + "  " + DateTime.Now);
     }

@@ -244,12 +244,20 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
 
     private void SaveListToFile(string filename, RelationStackList relationList)
     {
-      FileStream saveList = new FileStream(filename, FileMode.Create);
+      try
+      {
+        FileStream saveList = new FileStream(filename, FileMode.Create);
 
-      DataContractSerializer serializer = new DataContractSerializer(typeof(RelationStackList));
+        DataContractSerializer serializer = new DataContractSerializer(typeof(RelationStackList));
 
-      serializer.WriteObject(saveList, relationList);
-      saveList.Close();
+        serializer.WriteObject(saveList, relationList);
+        saveList.Close();
+      }
+      catch(Exception e)
+      {
+        Debug.WriteLine("Error creating file " + filename + " exception " + e.ToString());
+
+      }
     }
 
     private void ExportListToFile(string filename, RelationStackList relationList)
@@ -350,6 +358,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
         MessageBox.Show("Error: No person selected!");
       }
     }
+
     public void RelationProgress(int progressPercent, string text = null)
     {
       trace.TraceInformation("RelationFinderViewPanel::RelationProgress(" + progressPercent + ")");
@@ -364,7 +373,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
           this.relationList = relations;
           ShowRelations(this.relationList);
 
-          SaveListToFile("relations_" + familyTree.GetSourceFileName() + "_" + DateTime.Now.ToString().Replace("-", "").Replace(":", "").Replace(" ", "_") + "_" + resultNoCtrl.SelectedItem.ToString() + "_gen_" + ".fsrel", relationList);
+          SaveListToFile("relations_" + FamilyUtility.MakeFilename(familyTree.GetSourceFileName() + "_" + DateTime.Now.ToString() + "_" + resultNoCtrl.SelectedItem.ToString() + "_gen_" + ".fsrel"), relationList);
         }
         relWorker = null;
 

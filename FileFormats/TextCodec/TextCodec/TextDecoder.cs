@@ -463,7 +463,7 @@ namespace FamilyStudioData.FileFormats.TextCodec
       familyTree.Print();
       trace.TraceInformation("TextDecoder::Readfile() Done " + DateTime.Now);
 
-      Parse(fileName + "_parsed_" + DateTime.Now.ToString().Replace("-", "").Replace(":", "").Replace(" ", "_") + ".txt");
+      Parse(FamilyUtility.MakeFilename(fileName + "_parsed_" + DateTime.Now.ToString() + ".txt"));
 
       xrefMapLists.Analyze(trace);
       return true;

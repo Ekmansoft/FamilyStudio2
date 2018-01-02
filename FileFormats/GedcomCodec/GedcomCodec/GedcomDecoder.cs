@@ -449,7 +449,7 @@ namespace FamilyStudioData.FileFormats.GedcomCodec
 
     public void WriteToFile(string filename)
     {
-      using (StreamWriter writer = new StreamWriter(filename + "_import_" + DateTime.Now.ToString().Replace("-", "").Replace(":", "").Replace(" ", "_") + ".txt"))
+      using (StreamWriter writer = new StreamWriter(FamilyUtility.MakeFilename(filename + "_import_" + DateTime.Now.ToString() + ".txt")))
       {
         foreach (string str in importResultList)
         {

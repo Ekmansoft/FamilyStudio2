@@ -446,7 +446,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       {
         AddToListView(ref resultList, stats);
 
-        SaveListToFile(utility.GetCurrentDirectory() + "\\treeanalysis_" + familyTree.GetSourceFileName() + "_" + DateTime.Now.ToString().Replace("-", "").Replace(":", "").Replace(" ", "_") + "_" + stats.GetAncestorGenerationNo() + "_ancestGen_" + stats.GetDescendantGenerationNo() + "_descGen_.fss");
+        SaveListToFile(utility.GetCurrentDirectory() + "\\" + FamilyUtility.MakeFilename("treeanalysis_" + familyTree.GetSourceFileName() + "_" + DateTime.Now.ToString() + "_" + stats.GetAncestorGenerationNo() + "_ancestGen_" + stats.GetDescendantGenerationNo() + "_descGen_.fss"));
         ancestorGenerationNoCtrl.Enabled = true;
         stopButton.Enabled = false;
         startButton.Enabled = true;

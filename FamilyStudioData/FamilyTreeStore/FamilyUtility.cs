@@ -33,5 +33,14 @@ namespace FamilyStudioData.FamilyTreeStore
       return currentDirectory;
     }
 
+    public static String MakeFilename(String s)
+    {
+      foreach (char c in System.IO.Path.GetInvalidFileNameChars())
+      {
+        s = s.Replace(c, '_');
+      }
+      return s;
+    }
+
   }
 }
