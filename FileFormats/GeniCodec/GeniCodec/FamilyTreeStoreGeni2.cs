@@ -68,7 +68,35 @@ namespace FamilyStudioData.FileFormats.GeniCodec
       {
         if (!warningShown)
         {
-          FamilyWebBrowserClass.ShowMessage("Please enter a valid HKEY_CURRENT_USER\\Software\\endian.net\\FamilyStudio\\GeniAppId and HKEY_CURRENT_USER\\Software\\endian.net\\FamilyStudio\\GeniAppSecret!");
+          FamilyWebBrowserClass.ShowMessage("Please enter a valid valid Geni AppId and AppSecret separated by semicolon (id;secret)!");
+
+          bool success = false;
+          string regString = "";
+
+          if(FamilyWebBrowserClass.ShowInputDialog("Two strings separated by only semicolon: like <AppId>;<AppSecret>!", ref regString) == System.Windows.Forms.DialogResult.OK)
+          {
+            trace.TraceData(TraceEventType.Warning, 1, "Entering appid and appsecret: " + regString);
+
+            if (regString.Length > 3)
+            {
+              string[] subStrings = regString.Split(';');
+              if (subStrings.Length == 2 && (subStrings[0].Length >= 1) && (subStrings[1].Length >= 20))
+              {
+                clientId = subStrings[0];
+                clientSecret = subStrings[1];
+                Registry.SetValue("HKEY_CURRENT_USER\\Software\\endian.net\\FamilyStudio", "GeniAppId", clientId);
+                Registry.SetValue("HKEY_CURRENT_USER\\Software\\endian.net\\FamilyStudio", "GeniAppSecret", clientSecret);
+                FamilyWebBrowserClass.ShowMessage("Success entering keys! Now geni.com access should work, if you have provided valid values for app key and app secret!");
+                success = true;
+              }
+            }
+
+          }
+
+          if (!success)
+          {
+            FamilyWebBrowserClass.ShowMessage("Failure! Geni.com access will not work!");
+          }
           warningShown = true;
         }
         return false;
