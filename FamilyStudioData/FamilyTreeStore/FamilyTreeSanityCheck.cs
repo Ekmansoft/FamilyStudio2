@@ -238,14 +238,15 @@ namespace FamilyStudioData.FamilyTreeStore
   {
     public string ToString(FamilyTreeStoreBaseClass familyTree = null)
     {
-      string str = CalculateRelation(familyTree) + "\r\n";
+      StringBuilder strBuilder = new StringBuilder();
+      strBuilder.Append(CalculateRelation(familyTree) + FamilyUtility.GetLinefeed());
 
 
       foreach (Relation relation in this)
       {
-        str += "  " + relation.ToString(familyTree) + "\r\n";
+        strBuilder.Append("  " + relation.ToString(familyTree) + FamilyUtility.GetLinefeed());
       }
-      return str;
+      return strBuilder.ToString();
     }
 
     public RelationStack Duplicate()
@@ -459,27 +460,32 @@ namespace FamilyStudioData.FamilyTreeStore
       relations = new List<RelationStack>();
     }
 
+    private string Linefeed()
+    {
+      return FamilyUtility.GetLinefeed();
+    }
+
     public string ToString(FamilyTreeStoreBaseClass familyTree = null)
     {
-      string str = "";
+      StringBuilder strBuilder = new StringBuilder();
 
       if(sourceTree != null)
       {
-        str += sourceTree;
+        strBuilder.Append(sourceTree);
       }
-      str += "\r\n";
+      strBuilder.Append(Linefeed());
       if (time != null)
       {
-        str += time.ToString();
+        strBuilder.Append(time.ToString());
       }
-      str += "\r\n";
+      strBuilder.Append(Linefeed());
 
       foreach(RelationStack rel in relations)
       {
-        str += rel.ToString(familyTree);
+        strBuilder.Append(rel.ToString(familyTree));
       }
 
-      return str;
+      return strBuilder.ToString();
     }
   }
 
@@ -1463,56 +1469,57 @@ namespace FamilyStudioData.FamilyTreeStore
 
     private string Linefeed()
     {
-      return "\r\n";
+      return FamilyUtility.GetLinefeed();
     }
 
     override public string ToString()
     {
-      string str = "";
+      StringBuilder builder = new StringBuilder();
       //ancestorList.OrderBy<int, depth>();
 
-      str += "Analysis started at " + startTime + " done at " + DateTime.Now + Linefeed();
-      str += "Ancestor overview:" + Linefeed();
-      str += "  analysed " + people + " people   " + duplicatePeople + " more than once" + Linefeed();
-      str += "  analysed " + families + " families " + duplicateFamilies + " more than once" + Linefeed();
-      str += "  roots    " + ancestorList.Count + Linefeed();
+      builder.Append("Analysis started at " + startTime + " done at " + DateTime.Now + Linefeed());
+      builder.Append("Ancestor overview:" + Linefeed());
+      builder.Append("  analysed " + people + " people   " + duplicatePeople + " more than once" + Linefeed());
+      builder.Append("  analysed " + families + " families " + duplicateFamilies + " more than once" + Linefeed());
+      builder.Append("  roots    " + ancestorList.Count + Linefeed());
       //trace.TraceInformation("  max children: " + maxNoOfChildren+ " parents " + maxNoOfParents);
       //familyTree.Print();
 
       {
         IEnumerable<AncestorLineInfo> query = ancestorList.OrderBy(ancestor => ancestor.depth);
 
-        str += "Roots:" + Linefeed();
+
+        builder.Append("Roots:" + Linefeed());
         foreach (AncestorLineInfo root in query)
         {
           IndividualClass person = familyTree.GetIndividual(root.rootAncestor);
           //str += root.depth + " generations: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death) + Linefeed();
-          str += root.details + Linefeed();
-          str += root.relationPath.ToString(familyTree) + Linefeed();
+          builder.Append(root.details + Linefeed());
+          builder.Append(root.relationPath.ToString(familyTree) + Linefeed());
         }
       }
       {
         IEnumerable<HandledItem> query = analysedPeopleNo.OrderByDescending(ancestor => ancestor.number);
 
-        str += "Multiply Referenced: " + query.Count<HandledItem>() + " items" + Linefeed();
+        builder.Append("Multiply Referenced: " + query.Count<HandledItem>() + " items" + Linefeed());
         foreach (HandledItem item in query)
         {
           IndividualClass person = familyTree.GetIndividual(item.xref);
           if (item.number > 1)
           {
-            str += "Referenced " + item.number + " times: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death) + Linefeed();
+            builder.Append("Referenced " + item.number + " times: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death) + Linefeed());
             //str += root.relationPath.ToString(familyTree) + Linefeed();
             foreach (RelationStack stack in item.relationStackList)
             {
               if (stack != null)
               {
-                str += " " + stack.ToString(familyTree) + Linefeed();
+                builder.Append(" " + stack.ToString(familyTree) + Linefeed());
               }
             }
           }
         }
       }
-      return str;
+      return builder.ToString();
     }
 
     public IList<AncestorLineInfo> GetAncestorList()

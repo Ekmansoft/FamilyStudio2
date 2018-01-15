@@ -453,7 +453,7 @@ namespace FamilyStudioData.FileFormats.GedcomCodec
       {
         foreach (string str in importResultList)
         {
-          writer.Write(str + "\r\n");
+          writer.Write(str + FamilyUtility.GetLinefeed());
         }
       }
     }

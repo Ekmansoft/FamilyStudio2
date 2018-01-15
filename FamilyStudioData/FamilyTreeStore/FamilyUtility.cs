@@ -42,5 +42,9 @@ namespace FamilyStudioData.FamilyTreeStore
       return s;
     }
 
+    public static String GetLinefeed()
+    {
+      return "\r\n";
+    }
   }
 }

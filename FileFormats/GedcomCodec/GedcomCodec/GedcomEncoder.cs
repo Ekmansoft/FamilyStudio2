@@ -197,7 +197,7 @@ namespace FamilyStudioData.FileFormats.GedcomCodec
 
     private string Linefeed()
     {
-      return "\r\n";
+      return FamilyUtility.GetLinefeed();
     }
 
     private void WriteHeader(FileStream file, string filename)

@@ -290,7 +290,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
             this.relationList = relations;
             ShowRelations(this.relationList);
 
-            SaveListToFile("relations_" + familyTree.GetSourceFileName() + "_" + DateTime.Now.ToString().Replace("-", "").Replace(":", "").Replace(" ", "_") + "_" + resultNoCtrl.SelectedItem.ToString() + "_gen_" + ".fsrel", relationList);
+            SaveListToFile("relations_" + familyTree.GetSourceFileName() + "_" + FamilyUtility.MakeFilename(DateTime.Now.ToString()) + "_" + resultNoCtrl.SelectedItem.ToString() + "_gen_" + ".fsrel", relationList);
           }
           relWorker = null;
         }
@@ -378,7 +378,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
         relWorker = null;
 
 
-        //SaveListToFile(utility.GetCurrentDirectory() + "\\relations_" + familyTree.GetSourceFileName() + "_" + DateTime.Now.ToString().Replace("-", "").Replace(":", "").Replace(" ", "_") + "_" + resultNoCtrl.SelectedItem.ToString() + "_gen_" + (checkDescendants ? "_desc_" : "") + ".fss");
+        //SaveListToFile(utility.GetCurrentDirectory() + "\\" + FamilyUtility.MakeFilename("relations_" + familyTree.GetSourceFileName() + "_" + DateTime.Now.ToString() + "_" + resultNoCtrl.SelectedItem.ToString() + "_gen_" + (checkDescendants ? "_desc_" : "") + ".fss"));
         resultNoCtrl.Enabled = true;
         stopButton.Enabled = false;
         startButton.Enabled = true;
