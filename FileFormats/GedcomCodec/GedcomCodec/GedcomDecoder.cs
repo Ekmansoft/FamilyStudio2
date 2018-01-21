@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections;
+//using System.Collections;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
+//using System.Linq;
+//using System.Text;
 using System.ComponentModel;
-using FamilyStudioData.FamilyData;
+//using FamilyStudioData.FamilyData;
 //using FamilyStudioData.FamilyFileFormat;
-using FamilyStudioData.FileFormats.GedcomCodec;
+//using FamilyStudioData.FileFormats.GedcomCodec;
 using FamilyStudioData.FamilyTreeStore;
 
 namespace FamilyStudioData.FileFormats.GedcomCodec

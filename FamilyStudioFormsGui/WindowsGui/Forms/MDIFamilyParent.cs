@@ -368,5 +368,17 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
       }
     }
+
+
+    private void DownloadImages_OnClick(object sender, EventArgs e)
+    {
+      trace.TraceInformation("DownloadImages_OnClick");
+
+      if (this.ActiveMdiChild != null)
+      {
+        ((FamilyForm2)this.ActiveMdiChild).DownloadImages();
+      }
+
+    }
   }
 }

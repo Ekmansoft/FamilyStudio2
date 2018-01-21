@@ -34,6 +34,8 @@ using FamilyStudioFormsGui.WindowsGui.Panels.SearchPanel1;
 //using FamilyStudioFormsGui.WindowsGui.Panels.ComparePanel1;
 using FamilyStudioFormsGui.WindowsGui.Panels.NotePanel;
 using FamilyStudioData.FamilyFileFormat;
+using System.Drawing.Imaging;
+using System.Net;
 //using System.Collections;
 
 namespace FamilyStudioFormsGui.WindowsGui.Forms
@@ -507,6 +509,185 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         }
       }
 
+    }
+
+    public bool SaveImageLocal(String filename, String imageUrl, ImageFormat format)
+    {
+      WebClient client = new WebClient();
+      Stream stream = null;
+      //MultimediaLinkClass newLink = null;
+
+      try
+      {
+        stream = client.OpenRead(imageUrl);
+      }
+      catch (WebException e)
+      {
+        trace.TraceData(TraceEventType.Warning, 0, "could not fetch " + imageUrl + " " + e.ToString());
+        return false;
+      }
+      trace.TraceData(TraceEventType.Information, 0, "fetched " + imageUrl);
+      if (stream != null)
+      {
+        Bitmap bitmap = null;
+        try
+        {
+          bitmap = new Bitmap(stream);
+        }
+        catch (Exception e)
+        {
+          trace.TraceData(TraceEventType.Warning, 0, "stream error " + imageUrl + " " + e.ToString());
+          return false;
+        }
+
+        if (bitmap != null)
+        {
+          bitmap.Save(filename, format);
+
+          trace.TraceData(TraceEventType.Information, 0, "saved as " + filename);
+          //newLink = new MultimediaLinkClass(link.GetFormat(), filename);
+          //newLink.SetLink(filename);
+        }
+
+        stream.Flush();
+        stream.Close();
+      }
+      client.Dispose();
+      return true;
+    }
+
+    String GetLastPart(string url)
+    {
+      int fileNameStart = url.LastIndexOf('/');
+      int filenameEnd = 0;
+
+
+      if (fileNameStart < 0)
+      {
+        fileNameStart = url.LastIndexOf('\\');
+      }
+
+      if (fileNameStart < 0)
+      {
+        return url;
+      }
+      filenameEnd = url.Length - fileNameStart;
+
+      String result = url.Substring(fileNameStart + 1, filenameEnd - 1);
+
+      if (result.LastIndexOf('.') >= 0)
+      {
+        return result.Substring(0, result.LastIndexOf('.'));
+      }
+
+      return result;
+    }
+
+    public bool DownloadImages2(FamilyTreeStoreBaseClass tree)
+    {
+
+      IEnumerator<IndividualClass> individualIterator = tree.SearchPerson();
+      List<IndividualClass> individualList = new List<IndividualClass>();
+      FamilyUtility utility = new FamilyUtility();
+
+      String dirname = utility.GetCurrentDirectory() + "\\" + FamilyUtility.MakeFilename("ImageDownload_" + tree.GetSourceFileName() + "_" + DateTime.Now.ToString());
+      Directory.CreateDirectory(dirname);
+
+      List<String> endings = new List<string>();
+
+      endings.Add("_large.jpg");
+      endings.Add("_medium.jpg");
+      endings.Add("_t.jpg");
+      endings.Add("_t2.jpg");
+
+      while (individualIterator.MoveNext())
+      {
+        individualList.Add(individualIterator.Current);
+      }
+      foreach (IndividualClass person in individualList)
+      {
+        IList<MultimediaLinkClass> links = person.GetMultimediaLinkList();
+
+        IList<MultimediaLinkClass> newLinks = new List<MultimediaLinkClass>();
+        IList<String> dlLinks = new List<String>();
+        IList<String> dlLinksBase = new List<String>();
+        IList<String> dlLinksTrue = new List<String>();
+
+        foreach (MultimediaLinkClass link in links)
+        {
+          Boolean webimage = (link.GetLink().ToLower().IndexOf("http:") >= 0) || (link.GetLink().ToLower().IndexOf("https:") >= 0);
+
+          if (webimage)
+          {
+            dlLinks.Add(link.GetLink());
+          }
+        }
+
+        foreach (String link in dlLinks)
+        {
+          String basename = link;
+
+          if (link.ToLower().IndexOf(".jpg") >= 0)
+          {
+            foreach (String ending in endings)
+            {
+              if (link.ToLower().IndexOf(ending) >= 0)
+              {
+                basename = link.Substring(0, link.ToLower().IndexOf(ending));
+
+                if (dlLinksBase.IndexOf(basename) < 0)
+                {
+                  dlLinksBase.Add(basename);
+                }
+              }
+            }
+          }
+        }
+        foreach (String link in dlLinksBase)
+        {
+          int bestIndex = -1;
+          int index = 0;
+          while ((bestIndex < 0) && (index < endings.Count))
+          {
+            String newLink = link + endings[index];
+            bestIndex = dlLinks.IndexOf(newLink);
+            dlLinksTrue.Add(newLink);
+            index++;
+          }
+        }
+
+        foreach (String link in dlLinksTrue)
+        {
+          String filename = dirname + "\\" + FamilyUtility.MakeFilename(person.GetXrefName() + " " + person.GetName() + " " + GetLastPart(link));
+
+          if (filename.Length > 255)
+          {
+            filename = filename.Substring(0, 255);
+          }
+          filename = filename + ".jpg";
+          //trace.TraceInformation(filename);
+
+          if (SaveImageLocal(filename, link, ImageFormat.Jpeg))
+          {
+            newLinks.Add(new MultimediaLinkClass("image/jpeg", filename));
+          }
+        }
+        foreach (MultimediaLinkClass link in newLinks)
+        {
+          person.AddMultimediaLink(link);
+        }
+      }
+
+      return true;
+    }
+
+    public void DownloadImages()
+    {
+      if (familyTree != null)
+      {
+        //familyTree.DownloadImages();
+        DownloadImages2(familyTree);
+      }
     }
 
     public FamilyTreeStoreBaseClass GetTree()

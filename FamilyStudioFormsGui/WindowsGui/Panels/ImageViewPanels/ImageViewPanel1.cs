@@ -127,44 +127,62 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels
 
       trace.TraceInformation("GetImage: " + url);
       // Create a request for the URL. 		
-      WebRequest request = WebRequest.Create(url);
-      // If required by the server, set the credentials.
-      request.Credentials = CredentialCache.DefaultCredentials;
-      // Get the response.
+      if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+      { 
+        WebRequest request = WebRequest.Create(url);
+        // If required by the server, set the credentials.
+        request.Credentials = CredentialCache.DefaultCredentials;
+        // Get the response.
 
-      HttpWebResponse response = null;
+        HttpWebResponse response = null;
 
-      try
-      {
-        response = (HttpWebResponse)request.GetResponse();
+        try
+        {
+          response = (HttpWebResponse)request.GetResponse();
+        }
+
+        catch(WebException e)
+        {
+          trace.TraceData(TraceEventType.Warning, 0, "GetImage: " + url + " failed");
+          trace.TraceData(TraceEventType.Warning, 0, e.ToString());
+
+          return null;
+        }
+        // Display the status.
+        trace.TraceInformation(response.StatusDescription);
+        // Get the stream containing content returned by the server.
+        Stream dataStream = response.GetResponseStream();
+        // Open the stream using a StreamReader for easy access.
+        //StreamReader reader = new StreamReader(dataStream);
+        // Read the content.
+        //string responseFromServer = reader.ReadToEnd();
+        // Display the content.
+        //trace.TraceInformation(responseFromServer);
+        // Cleanup the streams and the response.
+
+        Image image = Image.FromStream(dataStream);
+
+        //reader.Close();
+        dataStream.Close();
+        response.Close();
+
+        return image;
       }
-
-      catch(WebException e)
+      else
       {
-        trace.TraceData(TraceEventType.Warning, 0, "GetImage: " + url + " failed");
-        trace.TraceData(TraceEventType.Warning, 0, e.ToString());
+        Image image = null;
 
-        return null;
+        try
+        {
+          image = Image.FromFile(url);
+        }
+        catch(Exception e)
+        {
+          trace.TraceData(TraceEventType.Warning, 0, "GetImage: " + url + " failed");
+          trace.TraceData(TraceEventType.Warning, 0, e.ToString());
+        }
+        return image;
       }
-      // Display the status.
-      trace.TraceInformation(response.StatusDescription);
-      // Get the stream containing content returned by the server.
-      Stream dataStream = response.GetResponseStream();
-      // Open the stream using a StreamReader for easy access.
-      //StreamReader reader = new StreamReader(dataStream);
-      // Read the content.
-      //string responseFromServer = reader.ReadToEnd();
-      // Display the content.
-      //trace.TraceInformation(responseFromServer);
-      // Cleanup the streams and the response.
-
-      Image image = Image.FromStream(dataStream);
-
-      //reader.Close();
-      dataStream.Close();
-      response.Close();
-
-      return image;
     }
 
     /*protected override void OnInvalidated()
