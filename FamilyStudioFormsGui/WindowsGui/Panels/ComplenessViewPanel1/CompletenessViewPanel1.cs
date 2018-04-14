@@ -88,6 +88,16 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
           limits.generationlimited = new SanityProperty();
           limits.generationlimited.active = true;
         }
+        if (limits.missingWeddingDate == null)
+        {
+          limits.missingWeddingDate = new SanityProperty();
+          limits.missingWeddingDate.active = true;
+        }
+        if (limits.missingPartner == null)
+        {
+          limits.missingPartner = new SanityProperty();
+          limits.missingPartner.active = true;
+        }
 
         if (delete)
         {

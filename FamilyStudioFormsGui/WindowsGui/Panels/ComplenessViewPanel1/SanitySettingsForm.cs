@@ -1,12 +1,12 @@
 ﻿using FamilyStudioData.FamilyTreeStore;
 using System;
-using System.Collections.Generic;
+//using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+//using System.Data;
+//using System.Drawing;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
@@ -62,6 +62,10 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
 
       this.parentProblemsCheckBox.Checked = limits.parentsProblem.active;
 
+      this.missingWeddingDateCheckBox.Checked = limits.missingWeddingDate.active;
+
+      this.missingPartnerCheckBox.Checked = limits.missingPartner.active;
+
       this.Show();
 
     }
@@ -101,6 +105,10 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       limits.parentsMissing.active = this.missingParentsCheckBox.Checked;
 
       limits.parentsProblem.active = this.parentProblemsCheckBox.Checked;
+
+      limits.missingWeddingDate.active = this.missingWeddingDateCheckBox.Checked;
+
+      limits.missingPartner.active = this.missingPartnerCheckBox.Checked;
 
       updateHandler(limits);
 

@@ -1564,7 +1564,24 @@ namespace FamilyStudioData.FileFormats.GeniCodec
                       }
                     }
                   }
-                  cache.AddFamily(family);
+
+                  if (!cache.CheckFamily(family.GetXrefName()))
+                  {
+                    //family.Print();
+
+                    // No marriage or divorce info this way, so fetch that as well.
+                    FamilyClass family2 = GetFamily(family.GetXrefName());
+
+                    if (family2 != null)
+                    {
+                      //family2.Print();
+                      cache.AddFamily(family);
+                    }
+                    else
+                    {
+                      cache.AddFamily(family);
+                    }
+                  }
                 }
               }
             }

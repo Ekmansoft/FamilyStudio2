@@ -606,6 +606,13 @@ namespace FamilyStudioData.FamilyData
       {
         trace.TraceInformation("\n s:0");
       }
+      if(familyEventList != null)
+      {
+        foreach(IndividualEventClass ev in familyEventList)
+        {
+          trace.TraceInformation("\n ev:" + ev.GetEventType() + " " + ev.GetDate());
+        }
+      }
       trace.TraceInformation("\nFamily:" + xrefName + "-end");
     }
 

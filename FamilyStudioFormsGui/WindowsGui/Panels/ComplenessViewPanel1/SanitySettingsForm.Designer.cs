@@ -50,6 +50,8 @@
       this.missingParentsCheckBox = new System.Windows.Forms.CheckBox();
       this.parentProblemsCheckBox = new System.Windows.Forms.CheckBox();
       this.okButton = new System.Windows.Forms.Button();
+      this.missingWeddingDateCheckBox = new System.Windows.Forms.CheckBox();
+      this.missingPartnerCheckBox = new System.Windows.Forms.CheckBox();
       ((System.ComponentModel.ISupportInitialize)(this.minParentsNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.maxMothersNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.maxFathersNumericUpDown)).BeginInit();
@@ -263,7 +265,7 @@
       // 
       // okButton
       // 
-      this.okButton.Location = new System.Drawing.Point(224, 403);
+      this.okButton.Location = new System.Drawing.Point(224, 418);
       this.okButton.Name = "okButton";
       this.okButton.Size = new System.Drawing.Size(98, 39);
       this.okButton.TabIndex = 25;
@@ -271,11 +273,33 @@
       this.okButton.UseVisualStyleBackColor = true;
       this.okButton.Click += new System.EventHandler(this.ClickOkHandler);
       // 
+      // missingWeddingDateCheckBox
+      // 
+      this.missingWeddingDateCheckBox.AutoSize = true;
+      this.missingWeddingDateCheckBox.Location = new System.Drawing.Point(16, 433);
+      this.missingWeddingDateCheckBox.Name = "missingWeddingDateCheckBox";
+      this.missingWeddingDateCheckBox.Size = new System.Drawing.Size(151, 24);
+      this.missingWeddingDateCheckBox.TabIndex = 26;
+      this.missingWeddingDateCheckBox.Text = "Missing wedding";
+      this.missingWeddingDateCheckBox.UseVisualStyleBackColor = true;
+      // 
+      // missingPartnerCheckBox
+      // 
+      this.missingPartnerCheckBox.AutoSize = true;
+      this.missingPartnerCheckBox.Location = new System.Drawing.Point(16, 403);
+      this.missingPartnerCheckBox.Name = "missingPartnerCheckBox";
+      this.missingPartnerCheckBox.Size = new System.Drawing.Size(143, 24);
+      this.missingPartnerCheckBox.TabIndex = 27;
+      this.missingPartnerCheckBox.Text = "Missing partner";
+      this.missingPartnerCheckBox.UseVisualStyleBackColor = true;
+      // 
       // SanitySettingsForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(340, 456);
+      this.ClientSize = new System.Drawing.Size(340, 468);
+      this.Controls.Add(this.missingPartnerCheckBox);
+      this.Controls.Add(this.missingWeddingDateCheckBox);
       this.Controls.Add(this.okButton);
       this.Controls.Add(this.parentProblemsCheckBox);
       this.Controls.Add(this.missingParentsCheckBox);
@@ -337,5 +361,7 @@
     private System.Windows.Forms.CheckBox missingParentsCheckBox;
     private System.Windows.Forms.CheckBox parentProblemsCheckBox;
     private System.Windows.Forms.Button okButton;
+    private System.Windows.Forms.CheckBox missingWeddingDateCheckBox;
+    private System.Windows.Forms.CheckBox missingPartnerCheckBox;
   }
 }
