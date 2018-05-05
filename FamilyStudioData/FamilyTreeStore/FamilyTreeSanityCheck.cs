@@ -1072,12 +1072,17 @@ namespace FamilyStudioData.FamilyTreeStore
                       RelationStack stack = relationStack.Duplicate();
                       if (mother != null)
                       {
+                        String extension = "where this is the mother";
                         stack.Add(new Relation(Relation.Type.Mother, mother.parent.GetXrefName()));
-                        AddToList(mother.parent.GetXrefName(), stack, depth, "Missing marriage date in family.");
+                        if ((father != null) && (father.parent != null))
+                        {
+                          extension = "with " + father.parent.GetName();
+                        }
+                        AddToList(mother.parent.GetXrefName(), stack, depth, "Missing marriage date in family " + extension);
                       } else if (father != null)
                       {
                         stack.Add(new Relation(Relation.Type.Father, father.parent.GetXrefName()));
-                        AddToList(father.parent.GetXrefName(), stack, depth, "Missing marriage date in family.");
+                        AddToList(father.parent.GetXrefName(), stack, depth, "Missing marriage date in family where this is the father");
                       }
                     }
                     if ((mother.death != DateTime.MinValue) && (ToYears(mother.death - birth.GetDate().ToDateTime()) < 0))

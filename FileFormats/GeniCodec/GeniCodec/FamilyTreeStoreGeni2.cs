@@ -1669,6 +1669,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
         if (personIterator != null)
         {
           IList<IndividualClass> personList = new List<IndividualClass>();
+          int index = 0;
           while (personIterator.MoveNext())
           {
             personList.Add(personIterator.Current);
@@ -1677,6 +1678,11 @@ namespace FamilyStudioData.FileFormats.GeniCodec
 
           foreach(IndividualClass person in personList)
           {
+            if(progressReporter != null)
+            {
+              progressReporter.ReportProgress(100.0 * (double)index / (double)personList.Count, "Checking " + index + " / " + personList.Count);
+            }
+            index++;
             yield return person;
           }
           trace.TraceInformation("SearchPerson():done " + (DateTime.Now - startTime) + "s");

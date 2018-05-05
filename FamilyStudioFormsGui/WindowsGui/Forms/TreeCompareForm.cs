@@ -135,12 +135,6 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     };
 
 
-
-
-
-
-
-
     void ReadListFromFile()
     {
       OpenFileDialog fileDlg = new OpenFileDialog();
@@ -311,15 +305,12 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
           }
         }
 
-
         exportFile.Close();
       }
     }
 
     void matchListView1_SelectedIndexChanged(object sender, EventArgs e)
     {
-      //throw new NotImplementedException();
-
       foreach (ListViewItem item in matchListView1.SelectedItems)
       {
         TreeItems items = (TreeItems)item.Tag;
@@ -375,6 +366,10 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     {
       matchListView1.Items.Add(lvItem);
     }
+    void MarkCompareFinished()
+    {
+      button1.Text = "Compare";
+    }
 
     delegate void ReportCompareResult(ListViewItem lvItem);
 
@@ -383,11 +378,25 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
       if(matchListView1.InvokeRequired)
       {
         //SetTextCallback callback = new SetTextCallback(TextCallback);
-        Invoke(new Action(() => AddToListbox(lvItem)));
+        if (lvItem != null)
+        {
+          Invoke(new Action(() => AddToListbox(lvItem)));
+        } 
+        else
+        {
+          Invoke(new Action(() => MarkCompareFinished()));
+        }
       }
       else
       {
-        AddToListbox(lvItem);
+        if (lvItem != null)
+        {
+          AddToListbox(lvItem);
+        }
+        else
+        {
+          MarkCompareFinished();
+        }
       }
     }
   
@@ -396,11 +405,11 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     {
       if(compareWorker != null)
       {
+        trace.TraceInformation("Warning, compare already running...");
         return;
       }
       if (listBox1.SelectedIndex < 0)
       {
-        //MessageBox errorMsg = new MessageBox(this, "Error: No tree selected");
         MessageBox.Show("No tree selected as first", "Error", MessageBoxButtons.OK);
         return;
       }
@@ -409,11 +418,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         MessageBox.Show("No tree selected as second", "Error", MessageBoxButtons.OK);
         return;
       }
-      /*if (listBox1.SelectedIndex == listBox2.SelectedIndex)
-      {
-        MessageBox.Show("Same tree selected twice", "Error", MessageBoxButtons.OK);
-        return;
-      }*/
+
       string name1 = listBox1.Items[listBox1.SelectedIndex].ToString();
       string name2 = listBox2.Items[listBox2.SelectedIndex].ToString();
 
@@ -444,6 +449,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
         compareWorker = new CompareTreeWorker(this, null, reporter, familyTree1, familyTree2, ReportCompareResultFunction);
 
+        button1.Text = "Stop";
+
       }
     }
 
@@ -471,7 +478,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         FamilyTreeStoreBaseClass familyTree2,
         ReportCompareResult resultReporter)
       {
-        trace = new TraceSource("CompareTreeWorker", SourceLevels.Warning);
+        trace = new TraceSource("CompareTreeWorker", SourceLevels.All);
 
         resultReporterFunction = resultReporter;
 
@@ -707,48 +714,128 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
       private void DoCompare(FamilyTreeStoreBaseClass familyTree1, FamilyTreeStoreBaseClass familyTree2, FamilyFormProgress reporter)
       {
         IEnumerator<IndividualClass> iterator1;
+        int cnt1 = 0;
         iterator1 = familyTree1.SearchPerson(null, reporter);
 
         trace.TraceInformation("DoCompare() started");
 
         if (iterator1 != null)
         {
-          while (iterator1.MoveNext())
+          do
           {
             IndividualClass person1 = (IndividualClass)iterator1.Current;
 
+            cnt1++;
+            if(person1 == null)
+            {
+              trace.TraceEvent(TraceEventType.Warning, 0, "Missing person at iterator=" + cnt1);
+              continue;
+            }
             trace.TraceInformation(reporter.ToString() + " 1:" + person1.GetName());
 
             IEnumerator<IndividualClass> iterator2;
             iterator2 = familyTree2.SearchPerson(person1.GetName());
+            int cnt2 = 0, cnt3 = 0;
 
             if (iterator2 != null)
             {
-              while (iterator2.MoveNext())
+              do
               {
-                //IndividualClass person1 = iterator1.Current;
                 IndividualClass person2 = iterator2.Current;
 
-
+                cnt3++;
                 if (person2 != null)
                 {
-                  trace.TraceInformation(reporter.ToString() + "   2:" + person2.GetName());
+                  //trace.TraceInformation(reporter.ToString() + "   2:" + person2.GetName());
                   if ((familyTree1 != familyTree2) || (person1.GetXrefName() != person2.GetXrefName()))
                   {
                     if (ComparePerson(person1, person2))
                     {
                       IndividualClass person2full = familyTree2.GetIndividual(person2.GetXrefName());
                       resultReporterFunction(CreateListItem(familyTree1, person1, familyTree2, person2full));
-                      //matchListView1.Items.Add(CreateListItem(familyTree1, person1, familyTree2, person2));
                     }
+                    cnt2++;
                   }
                 }
-                //searchResultListBox.Items.Add(indi1.GetName());
+              } while (iterator2.MoveNext());
+              trace.TraceInformation(reporter.ToString() + " " + cnt1 + "  compared to " + cnt2 + "," + cnt3);
+            }
+
+            if (cnt2 == 0)
+            {
+              IEnumerator<IndividualClass> iterator3;
+
+              if ((person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname).Length > 0) &&
+                  (person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname).Length > 0) &&
+                  !person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname).Equals(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname)))
+              {
+                String strippedName = person1.GetName();
+
+                if (strippedName.Contains(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname)))
+                {
+                  String maidenName = strippedName.Replace(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname), "").Replace("  ", " ");
+                  iterator3 = familyTree2.SearchPerson(maidenName);
+                  trace.TraceInformation(reporter.ToString() + " Searching Maiden name " + maidenName);
+
+                  if (iterator3 != null)
+                  {
+                    do
+                    {
+                      IndividualClass person2 = iterator3.Current;
+
+                      cnt3++;
+                      if (person2 != null)
+                      {
+                        if ((familyTree1 != familyTree2) || (person1.GetXrefName() != person2.GetXrefName()))
+                        {
+                          if (ComparePerson(person1, person2))
+                          {
+                            IndividualClass person2full = familyTree2.GetIndividual(person2.GetXrefName());
+                            resultReporterFunction(CreateListItem(familyTree1, person1, familyTree2, person2full));
+                          }
+                          cnt2++;
+                        }
+                      }
+                    } while (iterator3.MoveNext());
+                    trace.TraceInformation(reporter.ToString() + " Maiden " + cnt1 + "  compared to " + cnt2 + "," + cnt3);
+                  }
+                }
+                if (strippedName.Contains(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname)))
+                {
+                  String marriedName = strippedName.Replace(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname), "").Replace("  ", " ");
+                  iterator3 = familyTree2.SearchPerson(marriedName);
+
+                  trace.TraceInformation(reporter.ToString() + " Searching Married name " + marriedName);
+                  if (iterator3 != null)
+                  {
+                    do
+                    {
+                      //IndividualClass person1 = iterator1.Current;
+                      IndividualClass person2 = iterator3.Current;
+
+                      cnt3++;
+                      if (person2 != null)
+                      {
+                        //trace.TraceInformation(reporter.ToString() + "   2:" + person2.GetName());
+                        if ((familyTree1 != familyTree2) || (person1.GetXrefName() != person2.GetXrefName()))
+                        {
+                          if (ComparePerson(person1, person2))
+                          {
+                            IndividualClass person2full = familyTree2.GetIndividual(person2.GetXrefName());
+                            resultReporterFunction(CreateListItem(familyTree1, person1, familyTree2, person2full));
+                          }
+                          cnt2++;
+                        }
+                      }
+                    } while (iterator3.MoveNext());
+                    trace.TraceInformation(reporter.ToString() + " Married " + cnt1 + "  compared to " + cnt2 + "," + cnt3);
+                  }
+                }
               }
             }
 
             //indi.Print();
-          }
+          } while (iterator1.MoveNext());
         }
         else
         {
