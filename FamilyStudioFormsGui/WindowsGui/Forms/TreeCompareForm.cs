@@ -23,6 +23,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     //private ListView matchLis
     private FamilyForm2 selectedForm1;
     private FamilyForm2 selectedForm2;
+    private String individual1;
+    private String individual2;
     private FamilyUtility utility;
     private CompareTreeWorker compareWorker;
 
@@ -83,14 +85,25 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
       ToolStripItem saveItem = new ToolStripMenuItem();
       saveItem.Text = "Save...";
       saveItem.MouseUp += ContextMenuStrip_SelectSave;
-      ToolStripItem exportItem = new ToolStripMenuItem();
-      exportItem.Text = "Export...";
-      exportItem.MouseUp += ContextMenuStrip_SelectExport;
+      ToolStripItem exportItemText = new ToolStripMenuItem();
+      exportItemText.Text = "Export text...";
+      exportItemText.MouseUp += ContextMenuStrip_SelectExportText;
+
+      ToolStripItem exportItemHtml = new ToolStripMenuItem();
+      exportItemHtml.Text = "Export HTML...";
+      exportItemHtml.MouseUp += ContextMenuStrip_SelectExportHtml;
+
+      ToolStripItem showPersons = new ToolStripMenuItem();
+      showPersons.Text = "Show doublets...";
+      showPersons.MouseUp += ContextMenuStrip_SelectPersons;
+
 
       //matchListView1.ContextMenuStrip.Items.Add("Open");
       matchListView1.ContextMenuStrip.Items.Add(openItem);
       matchListView1.ContextMenuStrip.Items.Add(saveItem);
-      matchListView1.ContextMenuStrip.Items.Add(exportItem);
+      matchListView1.ContextMenuStrip.Items.Add(exportItemText);
+      matchListView1.ContextMenuStrip.Items.Add(exportItemHtml);
+      matchListView1.ContextMenuStrip.Items.Add(showPersons);
 
       //matchListView1.ContextMenuStrip.MouseClick += ContextMenuStrip_MouseClick;
       //matchListView1.ContextMenuStrip.Items.Add(saveItem);
@@ -114,6 +127,44 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
       }
     }
 
+    private void ContextMenuStrip_SelectPersons(object sender, MouseEventArgs e)
+    {
+      if (selectedForm1 != null)
+      {
+        String personXref = individual1;
+        IndividualClass person = selectedForm1.GetTree().GetIndividual(personXref);
+
+        if (person != null)
+        {
+          IList<string> urlList = person.GetUrlList();
+          if (urlList != null)
+          {
+            foreach (string url in urlList)
+            {
+              Process.Start(url);
+            }
+          }
+        }
+      }
+      if (selectedForm2 != null)
+      {
+        String personXref = individual2;
+        IndividualClass person = selectedForm2.GetTree().GetIndividual(personXref);
+
+        if (person != null)
+        {
+          IList<string> urlList = person.GetUrlList();
+          if (urlList != null)
+          {
+            foreach (string url in urlList)
+            {
+              Process.Start(url);
+            }
+          }
+        }
+      }
+    }
+
     void ContextMenuStrip_SelectOpen(object sender, MouseEventArgs e)
     {
       ReadListFromFile();
@@ -122,9 +173,13 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     {
       SaveListConents();
     }
-    void ContextMenuStrip_SelectExport(object sender, MouseEventArgs e)
+    void ContextMenuStrip_SelectExportText(object sender, MouseEventArgs e)
     {
-      ExportListConents();
+      ExportListConents(false);
+    }
+    void ContextMenuStrip_SelectExportHtml(object sender, MouseEventArgs e)
+    {
+      ExportListConents(true);
     }
 
     enum EventCorrectness
@@ -217,6 +272,26 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
       }
     }
 
+    string UrlsToString(IndividualClass person)
+    {
+      IList<string> urlList = person.GetUrlList();
+      StringBuilder builder = new StringBuilder();
+      if (urlList != null)
+      {
+        bool first = true;
+        foreach (string url in urlList)
+        {
+          if (!first)
+          {
+            builder.Append(" ");
+          }
+          builder.Append(url);
+          first = false;
+        }
+      }
+      return builder.ToString();
+    }
+
     string GetEventDateString(IndividualClass person, IndividualEventClass.EventType evType)
     {
       if (person != null)
@@ -236,10 +311,44 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
       return "";
     }
 
-    void ExportListConents()
+    void FormatPerson(IndividualClass person, bool html, StreamWriter exportFile)
+    {
+      if (!html)
+      {
+        exportFile.Write(UrlsToString(person));
+        exportFile.Write("\t");
+        exportFile.Write(person.GetName());
+        exportFile.Write("\t");
+        exportFile.Write(GetEventDateString(person, IndividualEventClass.EventType.Birth));
+        exportFile.Write("\t");
+        exportFile.Write(GetEventDateString(person, IndividualEventClass.EventType.Death));
+        exportFile.Write("\t");
+      }
+      else
+      {
+        exportFile.Write("\n<td><a href=\"");
+        exportFile.Write(UrlsToString(person));
+        exportFile.Write("\">");
+        exportFile.Write(person.GetName());
+        exportFile.Write(" (");
+        exportFile.Write(GetEventDateString(person, IndividualEventClass.EventType.Birth));
+        exportFile.Write(" - ");
+        exportFile.Write(GetEventDateString(person, IndividualEventClass.EventType.Death));
+        exportFile.Write(")</a></td>\n");
+      }    
+    }
+
+    void ExportListConents(bool html)
     {
       SaveFileDialog fileDlg = new SaveFileDialog();
-      fileDlg.Filter = "Compare List|*.txt";
+      if (html)
+      {
+        fileDlg.Filter = "Compare List|*.html";
+      }
+      else
+      {
+        fileDlg.Filter = "Compare List|*.txt";
+      }
       fileDlg.InitialDirectory = utility.GetCurrentDirectory();
 
       if (fileDlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
@@ -278,7 +387,15 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
         if (found1 && found2)
         {
-          exportFile.WriteLine("Name\tBirth\tDeath\tName\tBirth\tDeath");
+          if (html)
+          {
+            exportFile.WriteLine("<!DOCTYPE html><html><head><title>List of possible duplicate people</title></head><body><table><tr><th>Name1 (Birth - Death)</th><th>Name2 (Birth - Death)</th></tr>\n");
+          }
+          else
+          {
+            exportFile.WriteLine("Url\tName\tBirth\tDeath\tUrl\tName\tBirth\tDeath");
+          }
+
           foreach (ListViewItem item in matchListView1.Items)
           {
             TreeItems matchingPersons = (TreeItems)item.Tag;
@@ -288,23 +405,24 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
             person2 = familyTree2.GetIndividual(matchingPersons.item2);
             if ((person1 != null) && (person2 != null))
             {
-              exportFile.Write(person1.GetName());
-              exportFile.Write("\t");
-              exportFile.Write(GetEventDateString(person1, IndividualEventClass.EventType.Birth));
-              exportFile.Write("\t");
-              exportFile.Write(GetEventDateString(person1, IndividualEventClass.EventType.Death));
-              exportFile.Write("\t");
-              exportFile.Write(person2.GetName());
-              exportFile.Write("\t");
-              exportFile.Write(GetEventDateString(person2, IndividualEventClass.EventType.Birth));
-              exportFile.Write("\t");
-              exportFile.Write(GetEventDateString(person2, IndividualEventClass.EventType.Death));
-              exportFile.WriteLine("");
+              if(html)
+              {
+                exportFile.WriteLine("\n<tr>\n");
+              }
+              FormatPerson(person1, html, exportFile);
+              FormatPerson(person2, html, exportFile);
+              if (html)
+              {
+                exportFile.WriteLine("\n</tr>\n");
+              }
             }
-
           }
         }
 
+        if (html)
+        {
+          exportFile.WriteLine("\n</table></body></html>");
+        }
         exportFile.Close();
       }
     }
@@ -317,10 +435,12 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         if (selectedForm1 != null)
         {
           selectedForm1.SetSelectedIndividual(items.item1);
+          individual1 = items.item1;
         }
         if (selectedForm2 != null)
         {
           selectedForm2.SetSelectedIndividual(items.item2);
+          individual2 = items.item2;
         }
       }
     }
@@ -734,7 +854,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
             trace.TraceInformation(reporter.ToString() + " 1:" + person1.GetName());
 
             IEnumerator<IndividualClass> iterator2;
-            iterator2 = familyTree2.SearchPerson(person1.GetName());
+            iterator2 = familyTree2.SearchPerson(person1.GetName().Replace("*", ""));
             int cnt2 = 0, cnt3 = 0;
 
             if (iterator2 != null)
@@ -769,7 +889,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
                   (person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname).Length > 0) &&
                   !person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname).Equals(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname)))
               {
-                String strippedName = person1.GetName();
+                String strippedName = person1.GetName().Replace("*", "");
 
                 if (strippedName.Contains(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname)))
                 {

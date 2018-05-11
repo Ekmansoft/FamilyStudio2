@@ -931,7 +931,7 @@ namespace FamilyStudioData.FamilyTreeStore
       ParentInfo father = new ParentInfo();
       IndividualEventClass marriage = family.GetEvent(IndividualEventClass.EventType.FamMarriage);
 
-      if((marriage != null) && !marriage.GetDate().ValidDate())
+      if((marriage != null) && ((marriage.GetDate() == null) || !marriage.GetDate().ValidDate()))
       {
         marriage = null;
       }
