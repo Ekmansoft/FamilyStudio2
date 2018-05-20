@@ -35,7 +35,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
     private DomainUpDown ancestorGenerationNoCtrl;
     private ListView resultList;
     //private ArrayList personList;
-    private FamilyFormProgress progressReporter;
+    private AsyncWorkerProgress progressReporter;
     private CompletenessTreeWorker analyseTreeWorker;
     private AncestorStatistics stats;
     //private int descendantGenerationNo;
@@ -97,6 +97,12 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         {
           limits.missingPartner = new SanityProperty();
           limits.missingPartner.active = true;
+          limits.missingPartner.value = 115;
+        }
+        if (limits.duplicateCheck == null)
+        {
+          limits.duplicateCheck = new SanityProperty();
+          limits.duplicateCheck.active = false;
         }
 
         if (delete)
@@ -126,37 +132,52 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       storeSettings.Close();
     }
 
+    void AddItemToListView(AncestorLineInfo ancestor)
+    {
+      IndividualClass person = familyTree.GetIndividual(ancestor.rootAncestor);
+      if (person != null)
+      {
+        trace.TraceInformation("  " + ancestor.depth + " generations: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death));
+
+        ListViewItem oldItem = resultList.FindItemWithText(person.GetName());
+
+        if (oldItem != null)
+        {
+          if (oldItem.Tag.ToString() == ancestor.rootAncestor)
+          {
+            resultList.Items.Remove(oldItem);
+          }
+        }
+
+        ListViewItem item = new ListViewItem(person.GetName());
+        item.SubItems.AddRange(new string[] { ancestor.depth.ToString(), ancestor.relationPath.GetDistance(), person.GetDate(IndividualEventClass.EventType.Birth).ToString(), person.GetDate(IndividualEventClass.EventType.Death).ToString(), ancestor.details });
+        item.ToolTipText = ancestor.relationPath.ToString(familyTree);
+        item.Tag = person.GetXrefName();
+
+        resultList.Items.Add(item);
+        //list.Items.
+      }
+      else
+      {
+        trace.TraceEvent(TraceEventType.Error, 0, " Error could not fetch " + ancestor.rootAncestor + " from tree " + ancestor.depth + " generations " + ancestor.details);
+      }
+    }
+
     public void AddToListView(ref ListView list, AncestorStatistics stats)
     {
+      bool disableCounter = true;
       {
         IEnumerable<AncestorLineInfo> query = stats.GetAncestorList().OrderBy(ancestor => ancestor.depth);
 
-        //trace.TraceInformation("Shallowest:");
+        resultList.Items.Clear();
 
         foreach (AncestorLineInfo root in query)
         {
-          IndividualClass person = familyTree.GetIndividual(root.rootAncestor);
-          if (person != null)
-          {
-            trace.TraceInformation("  " + root.depth + " generations: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death));
-            //list.Add(new ListedPerson("Shallowest:  " + root.depth + " generations: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death), person.GetXrefName()));
-
-            ListViewItem item = new ListViewItem(person.GetName());
-            item.SubItems.AddRange(new string[] { root.depth.ToString(), person.GetDate(IndividualEventClass.EventType.Birth).ToString(), person.GetDate(IndividualEventClass.EventType.Death).ToString(), root.details });
-            item.ToolTipText = root.relationPath.ToString(familyTree);
-            item.Tag = person.GetXrefName();
-
-            list.Items.Add(item);
-            //list.Items.
-          }
-          else
-          {
-            trace.TraceEvent(TraceEventType.Error, 0, " Error could not fetch " + root.rootAncestor + " from tree " + root.depth + " generations " + root.details);
-
-          }
+          AddItemToListView(root);
         }
       }
 
+      if(!disableCounter)
       {
         IEnumerable<HandledItem> query = stats.GetAnalysedPeopleNo().OrderByDescending(ancestor => ancestor.number);
 
@@ -298,7 +319,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       //resultList.MouseClick += resultList_MouseClick;
       resultList.SelectedIndexChanged += resultList_SelectedIndexChanged;
       resultList.Columns.Add("Name", 120, HorizontalAlignment.Left);
-      resultList.Columns.Add("Gen", 40, HorizontalAlignment.Left);
+      resultList.Columns.Add("Distance", 40, HorizontalAlignment.Right);
+      resultList.Columns.Add("Relation", 40, HorizontalAlignment.Left);
       resultList.Columns.Add("Birth", 80, HorizontalAlignment.Left);
       resultList.Columns.Add("Death", 80, HorizontalAlignment.Left);
       resultList.Columns.Add("Details", 250, HorizontalAlignment.Left);
@@ -307,7 +329,9 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       resultList.FullRowSelect = true;
       resultList.ShowItemToolTips = true;
 
-      resultList.ContextMenuStrip = new ContextMenuStrip();
+      resultList.MouseUp += ResultList_MouseUp;
+
+      /*resultList.ContextMenuStrip = new ContextMenuStrip();
       ToolStripItem openItem = new ToolStripMenuItem();
       openItem.Text = "Open...";
       openItem.MouseUp += ContextMenuStrip_SelectOpen;
@@ -321,7 +345,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       ToolStripItem exportItem = new ToolStripMenuItem();
       exportItem.Text = "Export to Text...";
       exportItem.MouseUp += ContextMenuStrip_SelectExport;
-      resultList.ContextMenuStrip.Items.Add(exportItem);
+      resultList.ContextMenuStrip.Items.Add(exportItem);*/
 
       utility = new FamilyUtility();
 
@@ -329,6 +353,108 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
 
       trace.TraceInformation("CompletenessViewPanel1::CompletenessViewPanel1()");
 
+    }
+
+    void ResultList_Open_Click(object sender, EventArgs e)
+    {
+      ReadListFromFile();
+    }
+    void ResultList_Save_Click(object sender, EventArgs e)
+    {
+      SaveFileDialog fileDlg = new SaveFileDialog();
+      fileDlg.Filter = "Stats List|*.fss";
+      fileDlg.InitialDirectory = utility.GetCurrentDirectory();
+
+      if (fileDlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+      {
+        SaveListToFile(fileDlg.FileName);
+      }
+    }
+
+    void ResultList_ExportText_Click(object sender, EventArgs e)
+    {
+      SaveFileDialog fileDlg = new SaveFileDialog();
+      fileDlg.Filter = "Text file|*.txt";
+      fileDlg.InitialDirectory = utility.GetCurrentDirectory();
+
+      if (fileDlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+      {
+        ExportListText(fileDlg.FileName);
+      }
+    }
+
+    void ResultList_ExportHtml_Click(object sender, EventArgs e)
+    {
+      SaveFileDialog fileDlg = new SaveFileDialog();
+      fileDlg.Filter = "Html file|*.html";
+      fileDlg.InitialDirectory = utility.GetCurrentDirectory();
+
+      if (fileDlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+      {
+        ExportListHtml(fileDlg.FileName);
+      }
+    }
+
+    void ResultList_Url_Click(object sender, EventArgs e)
+    {
+      if (sender.GetType() == typeof(MenuItem))
+      {
+        MenuItem clickedItem = (MenuItem)sender;
+        //parent.AddRelative(AsyncTreePanel1.RelativeType.Child);
+        Process.Start(clickedItem.Text);
+      }
+    }
+
+
+    private void ResultList_MouseUp(object sender, MouseEventArgs e)
+    {
+      if (e.Button == System.Windows.Forms.MouseButtons.Right)
+      {
+        ContextMenu menu = new ContextMenu();
+
+        menu.MenuItems.Add(new MenuItem("Open...", ResultList_Open_Click));
+        menu.MenuItems.Add(new MenuItem("Save...", ResultList_Save_Click));
+        menu.MenuItems.Add(new MenuItem("Export text...", ResultList_ExportText_Click));
+        menu.MenuItems.Add(new MenuItem("Export HTML...", ResultList_ExportHtml_Click));
+
+        if (parentForm != null)
+        {
+          string selectedPerson = parentForm.GetSelectedIndividual();
+          IndividualClass individual = familyTree.GetIndividual(selectedPerson);
+          if (individual != null)
+          {
+            IList<string> urlList = individual.GetUrlList();
+            if (urlList != null)
+            {
+              foreach (string url in urlList)
+              {
+                menu.MenuItems.Add(new MenuItem(url, ResultList_Url_Click));
+              }
+            }
+          }
+          trace.TraceData(TraceEventType.Warning, 0, "selectedperson = " + selectedPerson);
+
+          if (stats != null)
+          {
+            AncestorLineInfo selected = stats.GetAncestor(selectedPerson);
+
+            if (selected != null)
+            {
+              trace.TraceData(TraceEventType.Warning, 0, "selected = " + selected + " dups=" + selected.duplicate.Count);
+
+              foreach (string duplicate in selected.duplicate)
+              {
+                menu.MenuItems.Add(new MenuItem(duplicate, ResultList_Url_Click));
+              }
+            }
+            else
+            {
+              trace.TraceData(TraceEventType.Warning, 0, "selected = null");
+            }
+          }
+        }
+        menu.Show(this, e.Location, LeftRightAlignment.Right);
+      }
     }
 
     void ContextMenuStrip_SelectOpen(object sender, MouseEventArgs e)
@@ -346,6 +472,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         SaveListToFile(fileDlg.FileName);
       }
     }
+
     void ContextMenuStrip_SelectExport(object sender, MouseEventArgs e)
     {
       SaveFileDialog fileDlg = new SaveFileDialog();
@@ -354,7 +481,19 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
 
       if (fileDlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
       {
-        ExportListToFile(fileDlg.FileName);
+        ExportListText(fileDlg.FileName);
+      }
+    }
+
+    void ContextMenuStrip_SelectHtmlExport(object sender, MouseEventArgs e)
+    {
+      SaveFileDialog fileDlg = new SaveFileDialog();
+      fileDlg.Filter = "HTML file|*.html";
+      fileDlg.InitialDirectory = utility.GetCurrentDirectory();
+
+      if (fileDlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+      {
+        ExportListHtml(fileDlg.FileName);
       }
     }
 
@@ -402,13 +541,31 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         trace.TraceEvent(TraceEventType.Error, 0, e.ToString());
       }
     }
-    private void ExportListToFile(string filename)
+
+    private void ExportListText(string filename)
     {
       try
       {
         StreamWriter exportFile = new StreamWriter(filename);
 
         exportFile.Write(stats.ToString());
+        exportFile.Close();
+      }
+      catch (System.NotSupportedException e)
+      {
+        trace.TraceInformation("Error saving file: " + filename);
+        trace.TraceInformation(e.ToString());
+      }
+
+    }
+
+    private void ExportListHtml(string filename)
+    {
+      try
+      {
+        StreamWriter exportFile = new StreamWriter(filename);
+
+        exportFile.Write(stats.ToHtml());
         exportFile.Close();
       }
       catch (System.NotSupportedException e)
@@ -502,6 +659,19 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         }
       }
     }
+
+    void AncestorUpdate(AncestorLineInfo ancestor)
+    {
+      if (resultList.InvokeRequired)
+      {
+        Invoke(new Action(() => AddItemToListView(ancestor)));
+      }
+      else
+      {
+        AddItemToListView(ancestor);
+      }
+    }
+
     void startButton_MouseClick(object sender, MouseEventArgs e)
     {
       trace.TraceInformation("CompletenessViewPanel1::startButton_MouseClick()" + DateTime.Now);
@@ -524,9 +694,9 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
 
         SanityCheckLimits limits = GetSanitySettings(utility.GetCurrentDirectory() + "\\SanitySettings.fssan");
 
-        progressReporter = new FamilyFormProgress(CompletenessProgress);
+        progressReporter = new AsyncWorkerProgress(CompletenessProgress);
 
-        stats = new AncestorStatistics(familyTree, limits, ancestorGenerations, descendantGenerationNo, progressReporter);
+        stats = new AncestorStatistics(familyTree, limits, ancestorGenerations, descendantGenerationNo, progressReporter, AncestorUpdate);
         trace.TraceInformation("selected:" + selectedIndividual.GetName() + " " + DateTime.Now);
 
 
@@ -606,20 +776,18 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
     }
 
 
-    private class CompletenessTreeWorker : AsyncWorkerProgress
+    private class CompletenessTreeWorker : AsyncWorkerProgressInterface
     {
       private BackgroundWorker backgroundWorker;
       private DateTime startTime;
-      //private FamilyTreeStoreBaseClass familyTree;
-      //string workerFileName;
       AncestorStatistics stats;
-      ProgressReporter progressReporter;
+      ProgressReporterInterface progressReporter;
       string startPersonXref;
       private TraceSource trace;
 
       public CompletenessTreeWorker(
         object sender,
-        ProgressReporter progress,
+        ProgressReporterInterface progress,
         string startIndividualXref,
         ref AncestorStatistics stats)
       {
@@ -643,6 +811,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         backgroundWorker.RunWorkerAsync(startIndividualXref);
 
       }
+
       public void DoWork(object sender, DoWorkEventArgs e)
       {
 
@@ -655,16 +824,12 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         
         if (startperson != null)
         {
-          stats.AnalyseAncestors(startperson, 0, 0.0);
+          stats.AnalyseTree(startperson);
         }
 
         trace.TraceInformation("AnalyseTreeWorker::DoWork(" + ")" + DateTime.Now);
       }
 
-      /*public FamilyTreeStoreBaseClass GetFamilyTree()
-      {
-        return familyTree;
-      }*/
       public void ProgressChanged(object sender, ProgressChangedEventArgs e)
       {
         trace.TraceInformation("CompletenessTreeWorker::ProgressChanged(" + e.ProgressPercentage + ")" + DateTime.Now);

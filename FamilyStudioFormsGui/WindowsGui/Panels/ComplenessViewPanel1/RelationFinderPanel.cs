@@ -341,7 +341,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
           noOfGenerations = Convert.ToInt32(resultNoCtrl.SelectedItem.ToString());
         }
 
-        FamilyFormProgress progress = new FamilyFormProgress(RelationProgress);
+        AsyncWorkerProgress progress = new AsyncWorkerProgress(RelationProgress);
         //CheckRelation relation = new CheckRelation(familyTree, selectedIndividual.GetXrefName(), familyTree.GetHomeIndividual(), noOfGenerations, ref relationList);
         this.relWorker = new RelationTreeWorker(this,
           progress,
@@ -443,113 +443,14 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
     }
 
 
-    /*private class AnalyseTreeWorker : AsyncWorkerProgress
-    {
-      private bool printDecode;
-      private BackgroundWorker backgroundWorker;
-      private DateTime startTime;
-      //private FamilyTreeStoreBaseClass familyTree;
-      //string workerFileName;
-      AncestorStatistics stats;
-      ProgressReporter progressReporter;
-      string startPersonXref;
-
-      public AnalyseTreeWorker(
-        object sender,
-        ProgressReporter progress,
-        string startIndividualXref,
-        ref AncestorStatistics stats)
-      {
-        printDecode = false;
-
-        //familyTree = stats.familyTree;
-
-        progressReporter = progress;
-        this.stats = stats;
-        startPersonXref = startIndividualXref;
-
-        backgroundWorker = new BackgroundWorker();
-
-        backgroundWorker.WorkerReportsProgress = true;
-        backgroundWorker.DoWork += new DoWorkEventHandler(DoWork);
-        backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Completed);
-        backgroundWorker.ProgressChanged += new ProgressChangedEventHandler(ProgressChanged);
-
-        backgroundWorker.RunWorkerAsync(startIndividualXref);
-
-      }
-      public void DoWork(object sender, DoWorkEventArgs e)
-      {
-
-        // This method will run on a thread other than the UI thread.
-        // Be sure not to manipulate any Windows Forms controls created
-        // on the UI thread from this method.
-        startTime = DateTime.Now;
-        //workerFileName = (String)e.Argument;
-        IndividualClass startperson = stats.GetFamilyTree().GetIndividual(startPersonXref);
-
-        if (startperson != null)
-        {
-          stats.AnalyseAncestors(startperson, 0, 0.0);
-        }
-
-        if (printDecode)
-        {
-          trace.TraceInformation("AnalyseTreeWorker::DoWork(" + ")" + DateTime.Now);
-        }
-      }
-
-      public void ProgressChanged(object sender, ProgressChangedEventArgs e)
-      {
-        if (printDecode)
-        {
-          trace.TraceInformation("AnalyseTreeWorker::ProgressChanged(" + e.ProgressPercentage + ")" + DateTime.Now);
-        }
-
-        if (stats.GetFamilyTree() != null)
-        {
-          progressReporter.ReportProgress(e.ProgressPercentage, stats.GetFamilyTree().GetShortTreeInfo());
-        }
-        else
-        {
-          progressReporter.ReportProgress(e.ProgressPercentage);
-        }
-      }
-      public void Completed(object sender, RunWorkerCompletedEventArgs e)
-      {
-        if (printDecode)
-        {
-          trace.TraceInformation("AnalyseTreeWorker::Completed()" + DateTime.Now);
-          trace.TraceInformation("  Start time:" + startTime + " end time: " + DateTime.Now);
-        }
-
-        progressReporter.Completed(stats.GetFamilyTree().GetShortTreeInfo());
-        stats.Print();
-      }
-
-      public void Dispose()
-      {
-        backgroundWorker.DoWork -= new DoWorkEventHandler(DoWork);
-        backgroundWorker.RunWorkerCompleted -= new RunWorkerCompletedEventHandler(Completed);
-        backgroundWorker.ProgressChanged -= new ProgressChangedEventHandler(ProgressChanged);
-        backgroundWorker.Dispose();
-      }
-    }*/
-
-
-
-
   }
 
-  class RelationTreeWorker : AsyncWorkerProgress
+  class RelationTreeWorker : AsyncWorkerProgressInterface
   {
     private BackgroundWorker backgroundWorker;
     private DateTime startTime;
-    //private FamilyTreeStoreBaseClass familyTree;
-    //string workerFileName;
-    //AncestorStatistics stats;
     private CheckRelation relation;
-    ProgressReporter progressReporter;
+    ProgressReporterInterface progressReporter;
     string startPerson1Xref;
     string startPerson2Xref;
     private TraceSource trace;
@@ -564,7 +465,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
 
     public RelationTreeWorker(
       object sender,
-      ProgressReporter progress,
+      ProgressReporterInterface progress,
       string startPerson1Xref,
       string startPerson2Xref,
       int noOfGenerations,

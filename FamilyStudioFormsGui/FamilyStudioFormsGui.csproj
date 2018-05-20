@@ -78,7 +78,6 @@
     <Compile Include="WindowsGui\Forms\AddPersonForm.Designer.cs">
       <DependentUpon>AddPersonForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="WindowsGui\Forms\AsyncWorkerProgress.cs" />
     <Compile Include="WindowsGui\Forms\CustomClass.cs" />
     <Compile Include="WindowsGui\Forms\FamilyForm2.cs">
       <SubType>Form</SubType>

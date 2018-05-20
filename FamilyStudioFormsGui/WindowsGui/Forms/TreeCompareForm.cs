@@ -11,7 +11,6 @@ using System.Text;
 using System.Windows.Forms;
 using FamilyStudioData.FamilyTreeStore;
 using FamilyStudioData.FamilyData;
-//using FamilyStudioData.FamilyTreeStore;
 
 namespace FamilyStudioFormsGui.WindowsGui.Forms
 {
@@ -27,37 +26,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     private String individual2;
     private FamilyUtility utility;
     private CompareTreeWorker compareWorker;
-
-
-    /*[DataContract]
-    class TreeItems
-    {
-      [DataMember]
-      public string item1;
-      [DataMember]
-      public string item2;
-
-      public TreeItems(string i1, string i2)
-      {
-        item1 = i1;
-        item2 = i2;
-      }
-    }
-
-    [DataContract]
-    class SavedMatches
-    {
-      [DataMember]
-      public string database1, database2;
-      [DataMember]
-      public IList<TreeItems> itemList;
-
-      public SavedMatches()
-      {
-        itemList = new List<TreeItems>();
-      }
-
-    }*/
+    private FamilyTreeStoreBaseClass familyTree1;
+    private FamilyTreeStoreBaseClass familyTree2;
 
     public TreeCompareForm(IList<Form> mdiChildren, MDIFamilyParent parent)
     {
@@ -182,12 +152,6 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
       ExportListConents(true);
     }
 
-    enum EventCorrectness
-    {
-      None,
-      Semi,
-      Perfect
-    };
 
 
     void ReadListFromFile()
@@ -208,8 +172,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
         bool found1 = false;
         bool found2 = false;
-        FamilyTreeStoreBaseClass familyTree1 = null;
-        FamilyTreeStoreBaseClass familyTree2 = null;
+        familyTree1 = null;
+        familyTree2 = null;
 
         int i = 0;
         foreach (FamilyForm2 form in formList)
@@ -236,7 +200,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         {
           matchListView1.Items.Clear();
 
-          FamilyFormProgress reporter = new FamilyFormProgress(WorkProgress);
+          AsyncWorkerProgress reporter = new AsyncWorkerProgress(WorkProgress);
 
           compareWorker = new CompareTreeWorker(this, matches, reporter, familyTree1, familyTree2, ReportCompareResultFunction);
 
@@ -262,7 +226,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         savedMatches.database2 = selectedForm2.Text;
         foreach (ListViewItem item in matchListView1.Items)
         {
-          TreeItems matchingPersons = (TreeItems)item.Tag;
+          DuplicateTreeItems matchingPersons = (DuplicateTreeItems)item.Tag;
 
           savedMatches.itemList.Add(matchingPersons);
         }
@@ -398,7 +362,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
           foreach (ListViewItem item in matchListView1.Items)
           {
-            TreeItems matchingPersons = (TreeItems)item.Tag;
+            DuplicateTreeItems matchingPersons = (DuplicateTreeItems)item.Tag;
             IndividualClass person1 = null, person2 = null;
 
             person1 = familyTree1.GetIndividual(matchingPersons.item1);
@@ -431,7 +395,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     {
       foreach (ListViewItem item in matchListView1.SelectedItems)
       {
-        TreeItems items = (TreeItems)item.Tag;
+        DuplicateTreeItems items = (DuplicateTreeItems)item.Tag;
         if (selectedForm1 != null)
         {
           selectedForm1.SetSelectedIndividual(items.item1);
@@ -565,7 +529,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
       {
         matchListView1.Items.Clear();
 
-        FamilyFormProgress reporter = new FamilyFormProgress(WorkProgress);
+        AsyncWorkerProgress reporter = new AsyncWorkerProgress(WorkProgress);
 
         compareWorker = new CompareTreeWorker(this, null, reporter, familyTree1, familyTree2, ReportCompareResultFunction);
 
@@ -575,11 +539,11 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     }
 
 
-    private class CompareTreeWorker : AsyncWorkerProgress
+    private class CompareTreeWorker : AsyncWorkerProgressInterface
     {
       private BackgroundWorker backgroundWorker;
       private DateTime startTime;
-      FamilyFormProgress progressReporter;
+      AsyncWorkerProgress progressReporter;
       private TraceSource trace;
       private ReportCompareResult resultReporterFunction;
       public SavedMatches matches;
@@ -592,8 +556,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
       public CompareTreeWorker(
         object sender,
-        SavedMatches matches, 
-        FamilyFormProgress progress,
+        SavedMatches matches,
+        AsyncWorkerProgress progress,
         FamilyTreeStoreBaseClass familyTree1,
         FamilyTreeStoreBaseClass familyTree2,
         ReportCompareResult resultReporter)
@@ -627,88 +591,16 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
       }
 
-      bool ComparePerson(IndividualClass person1, IndividualClass person2)
+      string GetShortFacts(FamilyStatusClass.IndividualStatus status)
       {
-        if (person1.GetName() == person2.GetName())
-        {
-          IndividualEventClass ev1 = person1.GetEvent(IndividualEventClass.EventType.Birth);
-          IndividualEventClass ev2 = person2.GetEvent(IndividualEventClass.EventType.Birth);
+        string statusStr = "";
 
-          if ((ev1 != null) && (ev2 != null))
-          {
-            if (ev1.GetDate().ValidDate() && ev2.GetDate().ValidDate())
-            {
-              DateTime date1 = ev1.GetDate().ToDateTime();
-              DateTime date2 = ev2.GetDate().ToDateTime();
+        statusStr += ConvertCorrectnessToString("birth date", status.birthCorrectness);
+        statusStr += "; " + ConvertCorrectnessToString("death date", status.deathCorrectness);
+        statusStr += "; " + status.noOfParents + " parents";
+        statusStr += "; " + status.noOfChildren + " children";
 
-              TimeSpan diff = date1 - date2;
-
-              if ((diff.Days < 10) && (diff.Days > -10))
-              {
-                person1.Print();
-                person2.Print();
-                // if (ev1.GetDate() == ev2.GetDate())
-                {
-                  return true;
-                }
-              }
-            }
-          }
-        }
-        return false;
-      }
-
-      string GetShortFacts(FamilyTreeStoreBaseClass familyTree, IndividualClass person)
-      {
-        string status = "";
-
-        if (person != null)
-        {
-          status += ConvertCorrectnessToString("birth date", CheckEvent(person, IndividualEventClass.EventType.Birth));
-          status += "; " + ConvertCorrectnessToString("death date", CheckEvent(person, IndividualEventClass.EventType.Death));
-          {
-            IList<FamilyXrefClass> childFams = person.GetFamilyChildList();
-
-            if (childFams != null)
-            {
-              foreach (FamilyXrefClass famXref in childFams)
-              {
-                FamilyClass family = familyTree.GetFamily(famXref.GetXrefName());
-
-                if (family != null)
-                {
-                  IList<IndividualXrefClass> parentList = family.GetParentList();
-                  if (parentList != null)
-                  {
-                    status += "; " + parentList.Count + " parents";
-                  }
-                }
-              }
-            }
-          }
-          {
-            IList<FamilyXrefClass> spouseFams = person.GetFamilySpouseList();
-
-            if (spouseFams != null)
-            {
-              foreach (FamilyXrefClass famXref in spouseFams)
-              {
-                FamilyClass family = familyTree.GetFamily(famXref.GetXrefName());
-
-                if (family != null)
-                {
-                  IList<IndividualXrefClass> childList = family.GetChildList();
-                  if (childList != null)
-                  {
-                    status += "; " + childList.Count + " children";
-                  }
-                }
-              }
-            }
-          }
-        }
-        return status;
-
+        return statusStr;
       }
 
       private string GetPersonString(IndividualClass person, string str)
@@ -716,43 +608,13 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         return person.GetName() + ",b:" + person.GetDate(IndividualEventClass.EventType.Birth).ToString() + ",d:" + person.GetDate(IndividualEventClass.EventType.Death).ToString() + ",f:" + str;
       }
 
-      EventCorrectness CheckEvent(IndividualClass person, IndividualEventClass.EventType evType)
-      {
-        IndividualEventClass ev = person.GetEvent(evType);
-        if (ev != null)
-        {
-          FamilyDateTimeClass date = ev.GetDate();
-          if (date != null)
-          {
-            if (date.ValidDate())
-            {
-              if (!date.GetApproximate())
-              {
-                switch (date.GetDateType())
-                {
-                  case FamilyDateTimeClass.FamilyDateType.YearMonthDayHourMinute:
-                  case FamilyDateTimeClass.FamilyDateType.YearMonthDayHourMinteSecond:
-                  case FamilyDateTimeClass.FamilyDateType.YearMonthDayHour:
-                  case FamilyDateTimeClass.FamilyDateType.YearMonthDay:
-                    return EventCorrectness.Perfect;
-
-                  default:
-                    return EventCorrectness.Semi;
-                }
-              }
-            }
-          }
-        }
-
-        return EventCorrectness.None;
-      }
-
-
       ListViewItem CreateListItem(FamilyTreeStoreBaseClass familyTree1, IndividualClass person1, FamilyTreeStoreBaseClass familyTree2, IndividualClass person2)
       {
         ListViewItem item = new ListViewItem(person1.GetName());
-        string str1 = GetShortFacts(familyTree1, person1);
-        string str2 = GetShortFacts(familyTree2, person2);
+        FamilyStatusClass.IndividualStatus status1 = FamilyStatusClass.CheckCorrectness(familyTree1, person1);
+        FamilyStatusClass.IndividualStatus status2 = FamilyStatusClass.CheckCorrectness(familyTree2, person2);
+        string str1 = GetShortFacts(status1);
+        string str2 = GetShortFacts(status2);
         item.SubItems.AddRange(new string[] { person1.GetDate(IndividualEventClass.EventType.Birth).ToString(), person1.GetDate(IndividualEventClass.EventType.Death).ToString(), str1, person2.GetName(), person2.GetDate(IndividualEventClass.EventType.Birth).ToString(), person2.GetDate(IndividualEventClass.EventType.Death).ToString(), str2 });
 
         trace.TraceInformation("match1:" + GetPersonString(person1, str1));
@@ -761,15 +623,15 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         item.UseItemStyleForSubItems = false;
         if (!person1.GetDate(IndividualEventClass.EventType.Birth).ToString().Equals(person2.GetDate(IndividualEventClass.EventType.Birth).ToString()))
         {
-          string checkChar = "Good birth";
+          //string checkChar = "Good birth";
           int idx1 = 1;
           int idx2 = 5;
-          if (str1.Contains(checkChar) && !str2.Contains(checkChar))
+          if (status1.birthCorrectness == FamilyStatusClass.EventCorrectness.Perfect && status2.birthCorrectness != FamilyStatusClass.EventCorrectness.Perfect)
           {
             item.SubItems[idx1].BackColor = Color.LightGreen;
             item.SubItems[idx2].BackColor = Color.LightSalmon;
           }
-          else if (!str1.Contains(checkChar) && str2.Contains(checkChar))
+          else if (status1.birthCorrectness != FamilyStatusClass.EventCorrectness.Perfect && status2.birthCorrectness == FamilyStatusClass.EventCorrectness.Perfect)
           {
             item.SubItems[idx1].BackColor = Color.LightSalmon;
             item.SubItems[idx2].BackColor = Color.LightGreen;
@@ -782,15 +644,14 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
         }
         if (!person1.GetDate(IndividualEventClass.EventType.Death).ToString().Equals(person2.GetDate(IndividualEventClass.EventType.Death).ToString()))
         {
-          string checkChar = "Good death";
           int idx1 = 2;
           int idx2 = 6;
-          if (str1.Contains(checkChar) && !str2.Contains(checkChar))
+          if (status1.deathCorrectness == FamilyStatusClass.EventCorrectness.Perfect && status2.deathCorrectness != FamilyStatusClass.EventCorrectness.Perfect)
           {
             item.SubItems[idx1].BackColor = Color.LightGreen;
             item.SubItems[idx2].BackColor = Color.LightSalmon;
           }
-          else if (!str1.Contains(checkChar) && str2.Contains(checkChar))
+          else if (status1.deathCorrectness != FamilyStatusClass.EventCorrectness.Perfect && status2.deathCorrectness == FamilyStatusClass.EventCorrectness.Perfect)
           {
             item.SubItems[idx1].BackColor = Color.LightSalmon;
             item.SubItems[idx2].BackColor = Color.LightGreen;
@@ -811,158 +672,41 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
 
         //item.Tag = person1.GetXrefName();
-        item.Tag = new TreeItems(person1.GetXrefName(), person2.GetXrefName());
+        item.Tag = new DuplicateTreeItems(person1.GetXrefName(), person2.GetXrefName());
 
         //matchListView1.Items.Add(item);
         return item;
       }
 
 
-      string ConvertCorrectnessToString(string s, EventCorrectness correctness)
+      string ConvertCorrectnessToString(string s, FamilyStatusClass.EventCorrectness correctness)
       {
         switch (correctness)
         {
-          case EventCorrectness.Perfect:
+          case FamilyStatusClass.EventCorrectness.Perfect:
             return "Good " + s;
 
-          case EventCorrectness.Semi:
+          case FamilyStatusClass.EventCorrectness.Semi:
             return "Inexact " + s;
         }
         return "No " + s;
       }
 
-      private void DoCompare(FamilyTreeStoreBaseClass familyTree1, FamilyTreeStoreBaseClass familyTree2, FamilyFormProgress reporter)
+      private void ReportMatchingProfiles(FamilyTreeStoreBaseClass familyTree1, string person1, FamilyTreeStoreBaseClass familyTree2, string person2)
       {
-        IEnumerator<IndividualClass> iterator1;
-        int cnt1 = 0;
-        iterator1 = familyTree1.SearchPerson(null, reporter);
+        IndividualClass person1full = familyTree1.GetIndividual(person1);
+        IndividualClass person2full = familyTree2.GetIndividual(person2);
+        resultReporterFunction(CreateListItem(familyTree1, person1full, familyTree2, person2full));
 
-        trace.TraceInformation("DoCompare() started");
-
-        if (iterator1 != null)
-        {
-          do
-          {
-            IndividualClass person1 = (IndividualClass)iterator1.Current;
-
-            cnt1++;
-            if(person1 == null)
-            {
-              trace.TraceEvent(TraceEventType.Warning, 0, "Missing person at iterator=" + cnt1);
-              continue;
-            }
-            trace.TraceInformation(reporter.ToString() + " 1:" + person1.GetName());
-
-            IEnumerator<IndividualClass> iterator2;
-            iterator2 = familyTree2.SearchPerson(person1.GetName().Replace("*", ""));
-            int cnt2 = 0, cnt3 = 0;
-
-            if (iterator2 != null)
-            {
-              do
-              {
-                IndividualClass person2 = iterator2.Current;
-
-                cnt3++;
-                if (person2 != null)
-                {
-                  //trace.TraceInformation(reporter.ToString() + "   2:" + person2.GetName());
-                  if ((familyTree1 != familyTree2) || (person1.GetXrefName() != person2.GetXrefName()))
-                  {
-                    if (ComparePerson(person1, person2))
-                    {
-                      IndividualClass person2full = familyTree2.GetIndividual(person2.GetXrefName());
-                      resultReporterFunction(CreateListItem(familyTree1, person1, familyTree2, person2full));
-                    }
-                    cnt2++;
-                  }
-                }
-              } while (iterator2.MoveNext());
-              trace.TraceInformation(reporter.ToString() + " " + cnt1 + "  compared to " + cnt2 + "," + cnt3);
-            }
-
-            if (cnt2 == 0)
-            {
-              IEnumerator<IndividualClass> iterator3;
-
-              if ((person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname).Length > 0) &&
-                  (person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname).Length > 0) &&
-                  !person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname).Equals(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname)))
-              {
-                String strippedName = person1.GetName().Replace("*", "");
-
-                if (strippedName.Contains(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname)))
-                {
-                  String maidenName = strippedName.Replace(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.Surname), "").Replace("  ", " ");
-                  iterator3 = familyTree2.SearchPerson(maidenName);
-                  trace.TraceInformation(reporter.ToString() + " Searching Maiden name " + maidenName);
-
-                  if (iterator3 != null)
-                  {
-                    do
-                    {
-                      IndividualClass person2 = iterator3.Current;
-
-                      cnt3++;
-                      if (person2 != null)
-                      {
-                        if ((familyTree1 != familyTree2) || (person1.GetXrefName() != person2.GetXrefName()))
-                        {
-                          if (ComparePerson(person1, person2))
-                          {
-                            IndividualClass person2full = familyTree2.GetIndividual(person2.GetXrefName());
-                            resultReporterFunction(CreateListItem(familyTree1, person1, familyTree2, person2full));
-                          }
-                          cnt2++;
-                        }
-                      }
-                    } while (iterator3.MoveNext());
-                    trace.TraceInformation(reporter.ToString() + " Maiden " + cnt1 + "  compared to " + cnt2 + "," + cnt3);
-                  }
-                }
-                if (strippedName.Contains(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname)))
-                {
-                  String marriedName = strippedName.Replace(person1.GetPersonalName().GetName(PersonalNameClass.PartialNameType.BirthSurname), "").Replace("  ", " ");
-                  iterator3 = familyTree2.SearchPerson(marriedName);
-
-                  trace.TraceInformation(reporter.ToString() + " Searching Married name " + marriedName);
-                  if (iterator3 != null)
-                  {
-                    do
-                    {
-                      //IndividualClass person1 = iterator1.Current;
-                      IndividualClass person2 = iterator3.Current;
-
-                      cnt3++;
-                      if (person2 != null)
-                      {
-                        //trace.TraceInformation(reporter.ToString() + "   2:" + person2.GetName());
-                        if ((familyTree1 != familyTree2) || (person1.GetXrefName() != person2.GetXrefName()))
-                        {
-                          if (ComparePerson(person1, person2))
-                          {
-                            IndividualClass person2full = familyTree2.GetIndividual(person2.GetXrefName());
-                            resultReporterFunction(CreateListItem(familyTree1, person1, familyTree2, person2full));
-                          }
-                          cnt2++;
-                        }
-                      }
-                    } while (iterator3.MoveNext());
-                    trace.TraceInformation(reporter.ToString() + " Married " + cnt1 + "  compared to " + cnt2 + "," + cnt3);
-                  }
-                }
-              }
-            }
-
-            //indi.Print();
-          } while (iterator1.MoveNext());
-        }
-        else
-        {
-          trace.TraceInformation("iter=null");
-        }
-        trace.TraceInformation("DoCompare() done");
       }
+
+
+      private void DoCompare(FamilyTreeStoreBaseClass familyTree1, FamilyTreeStoreBaseClass familyTree2, AsyncWorkerProgress reporter)
+      {
+
+        CompareTreeClass.CompareTrees(familyTree1, familyTree2, ReportMatchingProfiles, reporter);
+      }
+
       public void DoWork(object sender, DoWorkEventArgs e)
       {
 
@@ -987,7 +731,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
         WorkerInterface workerInput = (WorkerInterface)e.Argument;
 
-        foreach (TreeItems itemPair in matches.itemList)
+        foreach (DuplicateTreeItems itemPair in matches.itemList)
         {
           IndividualClass person1 = null, person2 = null;
 

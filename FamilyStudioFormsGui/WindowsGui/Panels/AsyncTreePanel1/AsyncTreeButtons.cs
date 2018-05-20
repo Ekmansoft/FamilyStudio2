@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+//using System.Linq;
+//using System.Text;
+//using System.Threading.Tasks;
 using System.Windows.Forms;
 using FamilyStudioData.FamilyData;
 
@@ -460,7 +460,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.AsyncTreePanel1
 
           FamilyDateTimeClass date = ev.GetDate();
 
-          if (date.GetDateType() != FamilyDateTimeClass.FamilyDateType.Unknown)
+          if ((date != null) && (date.GetDateType() != FamilyDateTimeClass.FamilyDateType.Unknown))
           {
             str += date.ToString();
           }

@@ -15,7 +15,7 @@ namespace FamilyStudioData.FileFormats.XmlCodec
 {
   public class XmlEncoder : FamilyTreeStore.FamilyFileEncoder
   {
-    private ProgressReporter workerProgressTarget;
+    private ProgressReporterInterface workerProgressTarget;
     private TraceSource trace;
 
     public XmlEncoder()
@@ -24,7 +24,7 @@ namespace FamilyStudioData.FileFormats.XmlCodec
     }
 
 
-    public void SetProgressTarget(ProgressReporter progressTarget)
+    public void SetProgressTarget(ProgressReporterInterface progressTarget)
     {
       workerProgressTarget = progressTarget;
     }

@@ -524,6 +524,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<string> GetUrlList(string sourceFilter = null)
     {
+      if (urlList == null)
+      {
+        return new List<string>();
+      }
       return urlList;
     }
     public void AddSource(SourceDescriptionClass source)

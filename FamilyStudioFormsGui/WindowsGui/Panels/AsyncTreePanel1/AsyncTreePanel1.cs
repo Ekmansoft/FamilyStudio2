@@ -125,7 +125,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.AsyncTreePanel1
       }
     }
 
-    class FindPersonThread : AsyncWorkerThread
+    class FindPersonThread : AsyncWorkerThreadInterface
     {
       static TraceSource trace = new TraceSource("FindPersonThread", SourceLevels.Warning);
       private BackgroundWorker backgroundWorker;
@@ -181,7 +181,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.AsyncTreePanel1
       }
     
     }
-    class FindFamilyThread : AsyncWorkerThread
+    class FindFamilyThread : AsyncWorkerThreadInterface
     {
       static TraceSource trace = new TraceSource("FindFamilyThread", SourceLevels.Warning);
       private BackgroundWorker backgroundWorker;

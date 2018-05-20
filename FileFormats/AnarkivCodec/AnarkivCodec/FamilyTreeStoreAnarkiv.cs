@@ -975,7 +975,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
     }
 
 
-    public IEnumerator<IndividualClass> SearchPerson(String individualName = null, ProgressReporter progressReporter = null)
+    public IEnumerator<IndividualClass> SearchPerson(String individualName = null, ProgressReporterInterface progressReporter = null)
     {
       string searchString = "";
       IList<AddressClassOrder> addressHemmanList = null;
@@ -1069,7 +1069,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
         //String prevPerson = "";
         IndividualClass individual = null;
         PersonalNameClass name = null;
-        FileProgressReporter progress = new FileProgressReporter(personTable.Rows.Count);
+        ProgressReporterClass progress = new ProgressReporterClass(personTable.Rows.Count);
 
         name = new PersonalNameClass();
         //trace.TraceInformation("Row:" + personRow.ToString());
@@ -1484,7 +1484,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
       return null;
     }
 
-    public IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporter progressReporter = null)
+    public IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporterInterface progressReporter = null)
     {
       trace.TraceInformation("SearchFamily_ddb(" + familyXrefName + ")-start:" + DateTime.Now);
 
@@ -1535,7 +1535,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
         string previousComment = "";
         string previousSource = "";
         bool addChildren = true;
-        FileProgressReporter progress = new FileProgressReporter(familyTable.Rows.Count);
+        ProgressReporterClass progress = new ProgressReporterClass(familyTable.Rows.Count);
         IndividualEventClass marriage = null;
 
         trace.TraceInformation("familyTable:" + familyTable.ToString() + ", columns.count=" + familyTable.Columns.Count + ", rows.count=" + familyTable.Rows.Count);
@@ -1672,7 +1672,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
       trace.TraceInformation("FamilyStoreAnarkiv::SearchFamily(" + familyXrefName + ")-end-2:" + DateTime.Now);
     }
 
-    public IEnumerator<FamilyClass> SearchFamily_ram(String familyXrefName = null, ProgressReporter progressReporter = null)
+    public IEnumerator<FamilyClass> SearchFamily_ram(String familyXrefName = null, ProgressReporterInterface progressReporter = null)
     {
       trace.TraceInformation("SearchFamily-ram(" + familyXrefName + ")-start:" + DateTime.Now);
       //AnarkivDataSet dataset = new AnarkivDataSet();
@@ -1684,7 +1684,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
 
       IEnumerator<KeyValuePair<int,AnarkivFamilyRelations>> anarkivFamily = familyMapper.GetEnumerator();
 
-      FileProgressReporter progress = new FileProgressReporter(familyMapper.Count);
+      ProgressReporterClass progress = new ProgressReporterClass(familyMapper.Count);
 
       while(anarkivFamily.MoveNext())
       {
@@ -1730,7 +1730,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
     {
     }
 
-    public IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1743,7 +1743,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
     {
       return null;
     }
-    public IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1752,7 +1752,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
     {
     }
 
-    public IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1761,7 +1761,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
     {
     }
 
-    public IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1769,7 +1769,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
     public void AddSubmission(SubmissionClass tempSubmission)
     {
     }
-    public IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1780,7 +1780,7 @@ namespace FamilyStudioData.FileFormats.AnarkivCodec
     public void SetSubmitterXref(SubmitterXrefClass tempSubmitterXref)
     {
     }
-    public IEnumerator<SubmitterClass> SearchSubmitter(String noteString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SubmitterClass> SearchSubmitter(String noteString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }

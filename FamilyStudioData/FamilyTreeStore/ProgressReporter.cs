@@ -5,17 +5,12 @@ using System.Text;
 
 namespace FamilyStudioData.FamilyTreeStore
 {
-  public interface ProgressReporter
-  {
-    void ReportProgress(double progressPercent, string progressText = null);
-    void Completed(string completedText = null);
-  }
-  public class FileProgressReporter
+  public class ProgressReporterClass
   {
     //int counter, maxValue, updateValue, subCounter;
     int lastUpdateValue, currentValue, maxValue, updateValue;
 
-    public FileProgressReporter(int maxValueIn)
+    public ProgressReporterClass(int maxValueIn)
     {
       maxValue = maxValueIn;
       lastUpdateValue = 0;

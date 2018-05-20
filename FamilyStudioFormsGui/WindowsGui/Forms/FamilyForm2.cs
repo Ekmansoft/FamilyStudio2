@@ -54,7 +54,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
     private ReadFileWorker  readFileWorker;
     private WriteFileWorker writeFileWorker;
-    private FamilyFormProgress progressReporter;
+    private AsyncWorkerProgress progressReporter;
     private int nextTreeTabToAdd;
     private int nextPersonTabToAdd;
     private TraceSource trace;
@@ -382,7 +382,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     {
       trace.TraceInformation("FamilyForm2::OpenWeb(" + FileName + ")" + DateTime.Now);
 
-      progressReporter = new FamilyFormProgress(FileLoadProgress);
+      progressReporter = new AsyncWorkerProgress(FileLoadProgress);
 
       readFileWorker = new ReadFileWorker(this, progressReporter, FileName, ref familyTree, CompletedCallback);
     }
@@ -391,7 +391,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     {
       trace.TraceInformation("FamilyForm2::ImportFile(" + FileName + ")" + DateTime.Now);
 
-      progressReporter = new FamilyFormProgress(FileLoadProgress);
+      progressReporter = new AsyncWorkerProgress(FileLoadProgress);
 
       readFileWorker = new ReadFileWorker(this, progressReporter, FileName, ref familyTree, CompletedCallback);
     }
@@ -455,7 +455,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     {
       trace.TraceInformation("FamilyForm2::SaveFile:" + filename + " idx:" + filterIndex);
 
-      progressReporter = new FamilyFormProgress(FileSaveProgress);
+      progressReporter = new AsyncWorkerProgress(FileSaveProgress);
 
       writeFileWorker = new WriteFileWorker(this, progressReporter, filename, operation, filterIndex, ref familyTree);
 
@@ -720,91 +720,21 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
   }
 
 
-  public class FamilyFormProgress : ProgressReporter
-  {
-    private DateTime startTime;
-    private double currentProgress;
-    private string currentProgressText;
-    private TraceSource trace;
 
-    private WorkProgressHandler progressHandlerFcn;
-
-    public FamilyFormProgress(WorkProgressHandler progressHandler)
-    {
-      trace = new TraceSource("FamilyFormProgress", SourceLevels.Warning);
-      progressHandlerFcn = progressHandler;
-      startTime = DateTime.Now;
-      currentProgress = 0.0;
-      currentProgressText = "";
-
-    }
-
-    public void ReportProgress(double progressPercent, string progressText = null)
-    {
-      TimeSpan deltaTime;
-      DateTime estimatedEndTime;
-      string endTimeString = "";
-
-      if (progressText != null)
-      {
-        currentProgressText = progressText;
-      }
-      if (progressPercent < currentProgress)
-      {
-        trace.TraceInformation("FamilyFormProgress::ReportProgress(" + progressPercent + " < " + currentProgress + ") =>" + DateTime.Now + " restart!");
-        startTime = DateTime.Now;
-      }
-      deltaTime = DateTime.Now - startTime;
-      currentProgress = progressPercent;
-      if ((progressPercent > 0.02) && (startTime != DateTime.Now))
-      {
-        estimatedEndTime = DateTime.Now.AddSeconds((100.0 - progressPercent) * deltaTime.TotalSeconds / progressPercent);
-        trace.TraceInformation("FamilyFormProgress::ReportProgress(" + progressPercent + ")" + DateTime.Now + ", elapsed:" + deltaTime.TotalSeconds + ",estimated time in seconds:" + deltaTime.TotalSeconds * 100.0 / progressPercent + ",end:" + estimatedEndTime);
-        endTimeString = " Estimated done at " + estimatedEndTime;
-      }
-      if (progressHandlerFcn != null)
-      {
-        progressHandlerFcn((int)progressPercent, currentProgressText + endTimeString);
-      }
-    }
-
-    public void Completed(string completedText = null)
-    {
-      string text = "";
-
-      if (completedText != null)
-      {
-        text = completedText;
-      }
-      trace.TraceInformation("FamilyFormProgress::Completed(" + text + ")" + DateTime.Now);
-
-      if (progressHandlerFcn != null)
-      {
-        progressHandlerFcn(-1, completedText);
-      }
-    }
-
-    public override string ToString()
-    {
-      TimeSpan delta = DateTime.Now.Subtract(startTime);
-      return delta.ToString(@"hh\:mm\:ss") + " " + currentProgress.ToString("F2") + "%";
-    }
-  }
-
-  public class ReadFileWorker : AsyncWorkerProgress
+  public class ReadFileWorker : AsyncWorkerProgressInterface
   {
     private BackgroundWorker backgroundWorker;
     private DateTime startTime;
     private FamilyTreeStoreBaseClass familyTree;
     string workerFileName;
-    ProgressReporter progressReporter;
+    ProgressReporterInterface progressReporter;
     private TraceSource trace;
     private FamilyFileTypeCollection codec;
     private CompletedCallback completedCallback;
 
     public ReadFileWorker(
       object sender, 
-      ProgressReporter progress, 
+      ProgressReporterInterface progress, 
       string filename, 
       ref FamilyTreeStoreBaseClass tree,
       CompletedCallback callback)
@@ -906,13 +836,13 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
   }
 
 
-  public class WriteFileWorker : AsyncWorkerProgress
+  public class WriteFileWorker : AsyncWorkerProgressInterface
   {
     private BackgroundWorker backgroundWorker;
     private DateTime startTime;
     private FamilyTreeStoreBaseClass familyTree;
     private string workerFileName;
-    private ProgressReporter progressReporter;
+    private ProgressReporterInterface progressReporter;
     private string progressString;
     private TraceSource trace;
     private FamilyFileTypeOperation operation;
@@ -920,7 +850,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
     public WriteFileWorker(
       object sender,
-      ProgressReporter progress,
+      ProgressReporterInterface progress,
       string filename,
       FamilyFileTypeOperation operation,
       int filterIndex,

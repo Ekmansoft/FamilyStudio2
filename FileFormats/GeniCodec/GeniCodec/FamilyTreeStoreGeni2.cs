@@ -38,6 +38,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
     private string clientId;
     private string clientSecret;
     private bool warningShown;
+    private const int MaxProfilesToSearch = 150;
 
     protected virtual void Dispose(bool managed)
     {
@@ -485,6 +486,9 @@ namespace FamilyStudioData.FileFormats.GeniCodec
 
     public class HttpSearchPersonResult
     {
+      public string prev_page{ get; set; }
+      public int page { get; set; }
+      public string next_page { get; set; }
       public List<HttpPerson> results { get; set; }
     }
 
@@ -1656,7 +1660,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
       return null;
     }
 
-    public IEnumerator<IndividualClass> SearchPerson(String individualName, ProgressReporter progressReporter = null)
+    public IEnumerator<IndividualClass> SearchPerson(String individualName, ProgressReporterInterface progressReporter = null)
     {
       DateTime startTime = DateTime.Now;
 
@@ -1696,16 +1700,31 @@ namespace FamilyStudioData.FileFormats.GeniCodec
         string sLine = GetWebData(searchPersonUrl, null, "SearchIndividual()" + individualName, 5);
         if (sLine != null)
         {
-          HttpSearchPersonResult searchPersonResult = serializer.Deserialize<HttpSearchPersonResult>(sLine);
-
-          if ((searchPersonResult != null) && (searchPersonResult.results != null))
+          int handledResults = 0;
+          do
           {
-            foreach (HttpPerson person in searchPersonResult.results)
+            HttpSearchPersonResult searchPersonResult = serializer.Deserialize<HttpSearchPersonResult>(sLine);
+
+            if (searchPersonResult != null)
             {
-              stats.SearchIndividual.fetchSuccess++;
-              yield return DecodeIndividual(person);
+              trace.TraceEvent(TraceEventType.Information, 0, "next page " + searchPersonResult.next_page + " prev " + searchPersonResult.prev_page + " page " + searchPersonResult.page);
+              if (searchPersonResult.results != null)
+              {
+                foreach (HttpPerson person in searchPersonResult.results)
+                {
+                  stats.SearchIndividual.fetchSuccess++;
+                  handledResults++;
+                  yield return DecodeIndividual(person);
+                }
+              }
+              trace.TraceEvent(TraceEventType.Information, 0, " successes " + stats.SearchIndividual.fetchSuccess);
             }
-          }
+            sLine = null;
+            if ((searchPersonResult.next_page != null) && (searchPersonResult.next_page.Length > 0) && (handledResults < MaxProfilesToSearch))
+            {
+              sLine = GetWebData(searchPersonResult.next_page, null, "SearchIndividual()" + individualName + " page " + searchPersonResult.page + 1, 5);
+            }
+          } while (sLine != null);
         }
         else
         {
@@ -1800,7 +1819,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
       UpdateFamilyCache();
     }
 
-    public IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporter progressReporter = null)
+    public IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporterInterface progressReporter = null)
     {
       if (familyXrefName == null)
       {
@@ -1826,7 +1845,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
     {
     }
 
-    public IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1839,7 +1858,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
     {
       return null;
     }
-    public IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1848,7 +1867,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
     {
     }
 
-    public IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1857,7 +1876,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
     {
     }
 
-    public IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1866,7 +1885,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
     {
     }
 
-    public IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1878,7 +1897,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
     public void SetSubmitterXref(SubmitterXrefClass tempSubmitterXref)
     {
     }
-    public IEnumerator<SubmitterClass> SearchSubmitter(String noteString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SubmitterClass> SearchSubmitter(String noteString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }

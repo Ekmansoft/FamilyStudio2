@@ -60,6 +60,7 @@
     <Compile Include="FamilyData\SourceClass.cs" />
     <Compile Include="FamilyData\SubmissionClass.cs" />
     <Compile Include="FamilyData\SubmitterClass.cs" />
+    <Compile Include="FamilyTreeStore\AsyncWorkerProgress.cs" />
     <Compile Include="FamilyTreeStore\FamilyFileEncoder.cs" />
     <Compile Include="FamilyTreeStore\FamilyFileType.cs" />
     <Compile Include="FamilyTreeStore\FamilyTreeCompareResults.cs" />

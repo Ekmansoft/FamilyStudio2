@@ -972,7 +972,7 @@ namespace FamilyStudioData.FileFormats.MyHeritageCodec
       return null;
     }
 
-    public IEnumerator<IndividualClass> SearchPerson(String individualName, ProgressReporter progressReporter = null)
+    public IEnumerator<IndividualClass> SearchPerson(String individualName, ProgressReporterInterface progressReporter = null)
     {
 
       if (printDecode)
@@ -1058,7 +1058,7 @@ namespace FamilyStudioData.FileFormats.MyHeritageCodec
       }
     }
 
-    public IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporter progressReporter = null)
+    public IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1067,7 +1067,7 @@ namespace FamilyStudioData.FileFormats.MyHeritageCodec
     {
     }
 
-    public IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1080,7 +1080,7 @@ namespace FamilyStudioData.FileFormats.MyHeritageCodec
     {
       return null;
     }
-    public IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1089,7 +1089,7 @@ namespace FamilyStudioData.FileFormats.MyHeritageCodec
     {
     }
 
-    public IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1098,7 +1098,7 @@ namespace FamilyStudioData.FileFormats.MyHeritageCodec
     {
     }
 
-    public IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1107,7 +1107,7 @@ namespace FamilyStudioData.FileFormats.MyHeritageCodec
     {
     }
 
-    public IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -1119,7 +1119,7 @@ namespace FamilyStudioData.FileFormats.MyHeritageCodec
     public void SetSubmitterXref(SubmitterXrefClass tempSubmitterXref)
     {
     }
-    public IEnumerator<SubmitterClass> SearchSubmitter(String noteString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SubmitterClass> SearchSubmitter(String noteString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }

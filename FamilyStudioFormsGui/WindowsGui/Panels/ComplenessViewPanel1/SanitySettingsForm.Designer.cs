@@ -52,6 +52,8 @@
       this.okButton = new System.Windows.Forms.Button();
       this.missingWeddingDateCheckBox = new System.Windows.Forms.CheckBox();
       this.missingPartnerCheckBox = new System.Windows.Forms.CheckBox();
+      this.duplicatesCheckBox = new System.Windows.Forms.CheckBox();
+      this.missingPartnerMinAgeUpDown = new System.Windows.Forms.NumericUpDown();
       ((System.ComponentModel.ISupportInitialize)(this.minParentsNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.maxMothersNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.maxFathersNumericUpDown)).BeginInit();
@@ -60,6 +62,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.minChildrenNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.maxChildrenNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.closeChildrenNumericUpDown)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.missingPartnerMinAgeUpDown)).BeginInit();
       this.SuspendLayout();
       // 
       // minParentsNumericUpDown
@@ -265,7 +268,7 @@
       // 
       // okButton
       // 
-      this.okButton.Location = new System.Drawing.Point(224, 418);
+      this.okButton.Location = new System.Drawing.Point(16, 504);
       this.okButton.Name = "okButton";
       this.okButton.Size = new System.Drawing.Size(98, 39);
       this.okButton.TabIndex = 25;
@@ -276,7 +279,7 @@
       // missingWeddingDateCheckBox
       // 
       this.missingWeddingDateCheckBox.AutoSize = true;
-      this.missingWeddingDateCheckBox.Location = new System.Drawing.Point(16, 433);
+      this.missingWeddingDateCheckBox.Location = new System.Drawing.Point(16, 434);
       this.missingWeddingDateCheckBox.Name = "missingWeddingDateCheckBox";
       this.missingWeddingDateCheckBox.Size = new System.Drawing.Size(151, 24);
       this.missingWeddingDateCheckBox.TabIndex = 26;
@@ -293,11 +296,35 @@
       this.missingPartnerCheckBox.Text = "Missing partner";
       this.missingPartnerCheckBox.UseVisualStyleBackColor = true;
       // 
+      // duplicatesCheckBox
+      // 
+      this.duplicatesCheckBox.AutoSize = true;
+      this.duplicatesCheckBox.Location = new System.Drawing.Point(16, 464);
+      this.duplicatesCheckBox.Name = "duplicatesCheckBox";
+      this.duplicatesCheckBox.Size = new System.Drawing.Size(110, 24);
+      this.duplicatesCheckBox.TabIndex = 28;
+      this.duplicatesCheckBox.Text = "Duplicates";
+      this.duplicatesCheckBox.UseVisualStyleBackColor = true;
+      // 
+      // missingPartnerEndYearUpDown1
+      // 
+      this.missingPartnerMinAgeUpDown.Location = new System.Drawing.Point(202, 401);
+      this.missingPartnerMinAgeUpDown.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+      this.missingPartnerMinAgeUpDown.Name = "missingPartnerEndYearUpDown1";
+      this.missingPartnerMinAgeUpDown.Size = new System.Drawing.Size(120, 26);
+      this.missingPartnerMinAgeUpDown.TabIndex = 29;
+      // 
       // SanitySettingsForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(340, 468);
+      this.ClientSize = new System.Drawing.Size(340, 555);
+      this.Controls.Add(this.missingPartnerMinAgeUpDown);
+      this.Controls.Add(this.duplicatesCheckBox);
       this.Controls.Add(this.missingPartnerCheckBox);
       this.Controls.Add(this.missingWeddingDateCheckBox);
       this.Controls.Add(this.okButton);
@@ -332,6 +359,7 @@
       ((System.ComponentModel.ISupportInitialize)(this.minChildrenNumericUpDown)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.maxChildrenNumericUpDown)).EndInit();
       ((System.ComponentModel.ISupportInitialize)(this.closeChildrenNumericUpDown)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.missingPartnerMinAgeUpDown)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -363,5 +391,7 @@
     private System.Windows.Forms.Button okButton;
     private System.Windows.Forms.CheckBox missingWeddingDateCheckBox;
     private System.Windows.Forms.CheckBox missingPartnerCheckBox;
+    private System.Windows.Forms.CheckBox duplicatesCheckBox;
+    private System.Windows.Forms.NumericUpDown missingPartnerMinAgeUpDown;
   }
 }

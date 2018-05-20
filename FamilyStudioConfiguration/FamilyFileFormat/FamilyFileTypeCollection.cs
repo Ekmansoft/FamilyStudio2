@@ -232,7 +232,7 @@ namespace FamilyStudioData.FamilyFileFormat
     //private GedcomEncoder gedcomEncoder;
     //private XmlEncoder xmlEncoder;
     private FamilyFileEncoder selectedEncoder;
-    private ProgressReporter storedProgressTarget;
+    private ProgressReporterInterface storedProgressTarget;
     private TraceSource trace;
     private class EncoderMap
     {
@@ -293,7 +293,7 @@ namespace FamilyStudioData.FamilyFileFormat
         }
       }
     }
-    public void SetProgressTarget(ProgressReporter progressTarget)
+    public void SetProgressTarget(ProgressReporterInterface progressTarget)
     {
       trace.TraceInformation("FamilyFileEncoderCollection.SetProgressTarget()");
       if (selectedEncoder != null)

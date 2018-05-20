@@ -65,6 +65,9 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       this.missingWeddingDateCheckBox.Checked = limits.missingWeddingDate.active;
 
       this.missingPartnerCheckBox.Checked = limits.missingPartner.active;
+      this.missingPartnerMinAgeUpDown.Value = limits.missingPartner.value;
+
+      this.duplicatesCheckBox.Checked = limits.duplicateCheck.active;
 
       this.Show();
 
@@ -109,6 +112,9 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       limits.missingWeddingDate.active = this.missingWeddingDateCheckBox.Checked;
 
       limits.missingPartner.active = this.missingPartnerCheckBox.Checked;
+      limits.missingPartner.value = (int)this.missingPartnerMinAgeUpDown.Value;
+
+      limits.duplicateCheck.active = this.duplicatesCheckBox.Checked;
 
       updateHandler(limits);
 

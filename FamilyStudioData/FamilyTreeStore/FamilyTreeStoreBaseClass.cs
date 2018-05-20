@@ -67,41 +67,41 @@ namespace FamilyStudioData.FamilyTreeStore
     // Family interface
     void AddFamily(FamilyClass tempFamily);
     FamilyClass GetFamily(String xrefName);
-    IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporter progressReporter = null);
+    IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporterInterface progressReporter = null);
 
     // Person interface
     bool AddIndividual(IndividualClass tempIndividual);
     bool UpdateIndividual(IndividualClass tempIndividual, PersonUpdateType type);
     IndividualClass GetIndividual(String xrefName = null, uint index = (uint)SelectIndex.NoIndex, PersonDetail detailLevel = PersonDetail.PersonDetail_All);
-    IEnumerator<IndividualClass> SearchPerson(String individualName = null, ProgressReporter progressReporter = null);
+    IEnumerator<IndividualClass> SearchPerson(String individualName = null, ProgressReporterInterface progressReporter = null);
     void SetHomeIndividual(String xrefName);
     string GetHomeIndividual();
 
     // Multimedia object interface
     void AddMultimediaObject(MultimediaObjectClass tempMultimediaObject);
-    IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporter progressReporter = null);
+    IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporterInterface progressReporter = null);
 
     // Note interface
     void AddNote(NoteClass tempNote);
     NoteClass GetNote(String xrefName);
-    IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporter progressReporter = null);
+    IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporterInterface progressReporter = null);
 
     // Repository interface
     void AddRepository(RepositoryClass tempRepository);
-    IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporter progressReporter = null);
+    IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporterInterface progressReporter = null);
 
     // Source interface (Move to import?)
     void AddSource(SourceClass tempSource);
-    IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporter progressReporter = null);
+    IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporterInterface progressReporter = null);
 
     // Submission interface (Move to import?)
     void AddSubmission(SubmissionClass tempSubmission);
-    IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporter progressReporter = null);
+    IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporterInterface progressReporter = null);
 
     // Submitter interface (Move to import?)
     void AddSubmitter(SubmitterClass tempSubmitter);
     void SetSubmitterXref(SubmitterXrefClass tempSubmitterXref);
-    IEnumerator<SubmitterClass> SearchSubmitter(String submitterName = null, ProgressReporter progressReporter = null);
+    IEnumerator<SubmitterClass> SearchSubmitter(String submitterName = null, ProgressReporterInterface progressReporter = null);
 
     string CreateNewXref(XrefType type);
 

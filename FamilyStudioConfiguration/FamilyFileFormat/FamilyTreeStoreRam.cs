@@ -185,11 +185,11 @@ namespace FamilyStudioData.FamilyTreeStore
       return homePerson;
     }
 
-    public IEnumerator<IndividualClass> SearchPerson(String individualName, ProgressReporter progressReporter = null)
+    public IEnumerator<IndividualClass> SearchPerson(String individualName, ProgressReporterInterface progressReporter = null)
     {
       IEnumerator<IndividualClass> enumerator = individualList.Values.GetEnumerator();
       string searchName = "";
-      FileProgressReporter progress = new FileProgressReporter(individualList.Count);
+      ProgressReporterClass progress = new ProgressReporterClass(individualList.Count);
       int i = 0;
 
       if (individualName != null)
@@ -227,10 +227,10 @@ namespace FamilyStudioData.FamilyTreeStore
       trace.TraceInformation("SearchPerson(" + searchName + ") done");
     }
 
-    public IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporter progressReporter = null)
+    public IEnumerator<FamilyClass> SearchFamily(String familyXrefName = null, ProgressReporterInterface progressReporter = null)
     {
       IEnumerator<FamilyClass> enumerator = familyList.Values.GetEnumerator(); ;
-      FileProgressReporter progress = new FileProgressReporter(familyList.Count);
+      ProgressReporterClass progress = new ProgressReporterClass(familyList.Count);
       int i = 0;
 
       trace.TraceInformation("SearchFamily()");
@@ -270,7 +270,7 @@ namespace FamilyStudioData.FamilyTreeStore
       multimediaObjectList.Add(tempMultimediaObject.GetXrefName(), tempMultimediaObject);
     }
 
-    public IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<MultimediaObjectClass> SearchMultimediaObject(String mmoString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -285,10 +285,10 @@ namespace FamilyStudioData.FamilyTreeStore
       return (NoteClass)noteList[xrefName];
     }
 
-    public IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<NoteClass> SearchNote(String noteString = null, ProgressReporterInterface progressReporter = null)
     {
       IEnumerator<NoteClass> enumerator = noteList.Values.GetEnumerator();
-      FileProgressReporter progress = new FileProgressReporter(noteList.Count);
+      ProgressReporterClass progress = new ProgressReporterClass(noteList.Count);
       int i = 0;
 
       trace.TraceInformation("SearchNote()");
@@ -328,7 +328,7 @@ namespace FamilyStudioData.FamilyTreeStore
       repositoryList.Add(tempRepository.GetXrefName(), tempRepository);
     }
 
-    public IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<RepositoryClass> SearchRepository(String repositoryString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -338,7 +338,7 @@ namespace FamilyStudioData.FamilyTreeStore
       sourceList.Add(tempSource.GetXrefName(), tempSource);
     }
 
-    public IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SourceClass> SearchSource(String sourceString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -348,7 +348,7 @@ namespace FamilyStudioData.FamilyTreeStore
       submissionList.Add(tempSubmission.GetXrefName(), tempSubmission);
     }
 
-    public IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SubmissionClass> SearchSubmission(String submissionString = null, ProgressReporterInterface progressReporter = null)
     {
       return null;
     }
@@ -366,10 +366,10 @@ namespace FamilyStudioData.FamilyTreeStore
     {
       submitterXref = tempSubmitterXref;
     }
-    public IEnumerator<SubmitterClass> SearchSubmitter(String submitterString = null, ProgressReporter progressReporter = null)
+    public IEnumerator<SubmitterClass> SearchSubmitter(String submitterString = null, ProgressReporterInterface progressReporter = null)
     {
       IEnumerator<SubmitterClass> enumerator = submitterList.Values.GetEnumerator();
-      FileProgressReporter progress = new FileProgressReporter(submitterList.Count);
+      ProgressReporterClass progress = new ProgressReporterClass(submitterList.Count);
       int i = 0;
 
       while (enumerator.MoveNext())

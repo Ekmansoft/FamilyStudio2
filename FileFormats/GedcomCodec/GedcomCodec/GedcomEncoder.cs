@@ -17,7 +17,7 @@ namespace FamilyStudioData.FileFormats.GedcomCodec
     private static TraceSource trace = new TraceSource("GedcomEncoder", SourceLevels.Warning);
     private Encoding enc;
     //private BackgroundWorker workerProgressTarget;
-    private ProgressReporter workerProgressTarget;
+    private ProgressReporterInterface workerProgressTarget;
 
     class XrefMapperClass
     {
@@ -1315,7 +1315,7 @@ namespace FamilyStudioData.FileFormats.GedcomCodec
       WriteData(file, "0 TRLR" + Linefeed());
     }
 
-    public void SetProgressTarget(ProgressReporter progressTarget)
+    public void SetProgressTarget(ProgressReporterInterface progressTarget)
     {
       workerProgressTarget = progressTarget;
     }

@@ -13,7 +13,7 @@ namespace FamilyStudioData.FamilyTreeStore
   {
     void StoreFile(FamilyTreeStoreBaseClass familyTree, string filename, FamilyFileTypeOperation operation, int variant = 0);
 
-    void SetProgressTarget(ProgressReporter progressTarget);
+    void SetProgressTarget(ProgressReporterInterface progressTarget);
 
     string GetFileTypeFilter(FamilyFileTypeOperation operation, int variant = 0);
 
