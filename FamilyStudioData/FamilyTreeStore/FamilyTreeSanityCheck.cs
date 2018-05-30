@@ -172,8 +172,32 @@ namespace FamilyStudioData.FamilyTreeStore
     [DataMember]
     public SanityProperty duplicateCheck;
 
+    public IDictionary<SanityProblemId, SanityProperty> sanityArray;
+
+    public enum SanityProblemId
+    {
+      parentLimitMin_e,
+      motherLimitMax_e,
+      fatherLimitMax_e,
+      eventLimitMin_e,
+      eventLimitMax_e,
+      noOfChildrenMin_e,
+      noOfChildrenMax_e,
+      daysBetweenChildren_e,
+      twins_e,
+      inexactBirthDeath_e,
+      unknownBirthDeath_e,
+      parentsMissing_e,
+      parentsProblem_e,
+      missingWeddingDate_e,
+      missingPartner_e,
+      generationlimited_e,
+      duplicateCheck_e,
+    }
+
     public SanityCheckLimits()
     {
+
       parentLimitMin = new SanityProperty();
       parentLimitMin.value = 15;
       parentLimitMin.active = true;
@@ -233,6 +257,28 @@ namespace FamilyStudioData.FamilyTreeStore
 
       duplicateCheck = new SanityProperty();
       duplicateCheck.active = false;
+    }
+
+    public void CreateArray()
+    { 
+      sanityArray = new Dictionary<SanityProblemId, SanityProperty>();
+      sanityArray.Add(SanityProblemId.parentLimitMin_e, parentLimitMin);
+      sanityArray.Add(SanityProblemId.motherLimitMax_e, motherLimitMax);
+      sanityArray.Add(SanityProblemId.fatherLimitMax_e, fatherLimitMax);
+      sanityArray.Add(SanityProblemId.eventLimitMin_e, eventLimitMin);
+      sanityArray.Add(SanityProblemId.eventLimitMax_e, eventLimitMax);
+      sanityArray.Add(SanityProblemId.noOfChildrenMin_e, noOfChildrenMin);
+      sanityArray.Add(SanityProblemId.noOfChildrenMax_e, noOfChildrenMax);
+      sanityArray.Add(SanityProblemId.daysBetweenChildren_e, daysBetweenChildren);
+      sanityArray.Add(SanityProblemId.twins_e, twins);
+      sanityArray.Add(SanityProblemId.inexactBirthDeath_e, inexactBirthDeath);
+      sanityArray.Add(SanityProblemId.unknownBirthDeath_e, unknownBirthDeath);
+      sanityArray.Add(SanityProblemId.parentsMissing_e, parentsMissing);
+      sanityArray.Add(SanityProblemId.parentsProblem_e, parentsProblem);
+      sanityArray.Add(SanityProblemId.missingWeddingDate_e, missingWeddingDate);
+      sanityArray.Add(SanityProblemId.missingPartner_e, missingPartner);
+      sanityArray.Add(SanityProblemId.generationlimited_e, generationlimited);
+      sanityArray.Add(SanityProblemId.duplicateCheck_e, duplicateCheck);
     }
   }
 
@@ -638,6 +684,24 @@ namespace FamilyStudioData.FamilyTreeStore
     }
   }
 
+  [DataContract]
+  public class SanityProblem
+  {
+    [DataMember]
+    public SanityCheckLimits.SanityProblemId id;
+    [DataMember]
+    public string details;
+    [DataMember]
+    public string url;
+
+    public SanityProblem(SanityCheckLimits.SanityProblemId id, string details, string url = null)
+    {
+      this.id = id;
+      this.details = details;
+      this.url = url;
+    }
+  }
+
 
   [DataContract]
   public class AncestorLineInfo
@@ -648,27 +712,34 @@ namespace FamilyStudioData.FamilyTreeStore
     public int depth;
     [DataMember]
     public string rootAncestor;
-    [DataMember]
-    public string details;
+    //[DataMember]
+    //public string details;
     [DataMember]
     public RelationStack relationPath;
     [DataMember]
     public IList<string> duplicate;
+    [DataMember]
+    public IList<SanityProblem> problemList;
 
-    public AncestorLineInfo(string xref, RelationStack relationStack, int depth, string detailString, string duplicate)
+    public AncestorLineInfo(string xref, RelationStack relationStack, int depth, SanityCheckLimits.SanityProblemId id, string detailString, string url)
     {
       this.depth = depth;
       this.rootAncestor = xref;
-      this.details = detailString;
+      //this.details = detailString;
       this.relationPath = relationStack.Duplicate();
+      if(problemList == null)
+      {
+        problemList = new List<SanityProblem>();
+      }
       if(this.duplicate == null)
       {
         this.duplicate = new List<string>();
       }
-      if (duplicate != null)
+      if (url != null)
       {
-        this.duplicate.Add(duplicate);
+        this.duplicate.Add(url);
       }
+      problemList.Add(new SanityProblem(id, detailString, url));
 
       // Depth no longer the same as number of generations
       /*if (depth != relationStack.Generations())
@@ -680,6 +751,23 @@ namespace FamilyStudioData.FamilyTreeStore
         trace.TraceEvent(TraceEventType.Error, 0, "Error: Last person mismatch: " + relationStack.GetLast() + "!=" + xref + "; " + relationStack.GetDistance());
         trace.TraceEvent(TraceEventType.Error, 0, relationStack.ToString());
       }
+    }
+    public string GetDetailString(SanityCheckLimits limits)
+    {
+      StringBuilder result = new StringBuilder();
+
+      foreach(SanityProblem problem in problemList)
+      {
+        if(limits.sanityArray[problem.id].active)
+        {
+          if(result.Length > 0)
+          {
+            result.Append("; ");
+          }
+          result.Append(problem.details);
+        }
+      }
+      return result.ToString();
     }
   }
 
@@ -882,20 +970,21 @@ namespace FamilyStudioData.FamilyTreeStore
       return null;
     }
 
-    public void AddToList(string rootAncestor, RelationStack relationStack, int depth, string description = null, string duplicate = null)
+    public void AddToList(string rootAncestor, RelationStack relationStack, int depth, SanityCheckLimits.SanityProblemId id, string description, string url = null)
     {
       trace.TraceInformation("AddToList(" + rootAncestor + "," + depth + "," + description + "," + relationStack.Count + ")");
       trace.TraceInformation(relationStack.ToString(familyTree));
 
       if (ancestorList.ContainsKey(rootAncestor))
       {
-        if (ancestorList[rootAncestor].details.IndexOf(description) < 0)
+        /*if (ancestorList[rootAncestor].details.IndexOf(description) < 0)
         {
           ancestorList[rootAncestor].details += "; " + description;
-        }
-        if (duplicate != null)
+        }*/
+        ancestorList[rootAncestor].problemList.Add(new SanityProblem(id, description, url));
+        if (url != null)
         {
-          ancestorList[rootAncestor].duplicate.Add(duplicate);
+          ancestorList[rootAncestor].duplicate.Add(url);
         }
 
         if(this.updateCallback != null)
@@ -906,7 +995,7 @@ namespace FamilyStudioData.FamilyTreeStore
         return;
       }
 
-      AncestorLineInfo newInfo = new AncestorLineInfo(rootAncestor, relationStack, depth, description, duplicate);
+      AncestorLineInfo newInfo = new AncestorLineInfo(rootAncestor, relationStack, depth, id, description, url);
 
       if (this.updateCallback != null)
       {
@@ -932,19 +1021,18 @@ namespace FamilyStudioData.FamilyTreeStore
               (ev.GetEventType() != IndividualEventClass.EventType.Birth) &&
               (ev.GetEventType() != IndividualEventClass.EventType.RecordUpdate))
           {
-            if (limits.eventLimitMin.active &&
-                (ToYears(ev.GetDate().ToDateTime() - birth.GetDate().ToDateTime()) < limits.eventLimitMin.value) &&
+            if ((ToYears(ev.GetDate().ToDateTime() - birth.GetDate().ToDateTime()) < limits.eventLimitMin.value) &&
                 (ev.GetEventType() != IndividualEventClass.EventType.Baptism))
             {
               //youngestAtEvent = ev.GetDate().ToDateTime() - birth.GetDate().ToDateTime();
               trace.TraceInformation(" Young person at event " + person.GetXrefName() + ":" + person.GetName() + ", b:" + birth.GetDate() + " " + person.GetEvent(IndividualEventClass.EventType.Birth) + " : " + ev.GetEventType() + " " + ev.GetDate());
-              AddToList(person.GetXrefName(), relationStack, depth, "Young at event, born " + birth.GetDate() + " event" + ev.GetEventType() + " " + ev.GetDate());
+              AddToList(person.GetXrefName(), relationStack, depth, SanityCheckLimits.SanityProblemId.eventLimitMin_e, "Young at event, born " + birth.GetDate() + " event" + ev.GetEventType() + " " + ev.GetDate());
             }
-            if (limits.eventLimitMax.active && ToYears(ev.GetDate().ToDateTime() - birth.GetDate().ToDateTime()) > limits.eventLimitMax.value)
+            if (ToYears(ev.GetDate().ToDateTime() - birth.GetDate().ToDateTime()) > limits.eventLimitMax.value)
             {
               //oldestAtEvent = ev.GetDate().ToDateTime() - birth.GetDate().ToDateTime();
               trace.TraceInformation(" Old person at event " + person.GetXrefName() + ":" + person.GetName() + ", b:" + person.GetEvent(IndividualEventClass.EventType.Birth) + " : " + ev.GetEventType() + ev.GetDate());
-              AddToList(person.GetXrefName(), relationStack, depth, "Old at event, born " + birth.GetDate() + " event" + ev.GetEventType() + " " + ev.GetDate());
+              AddToList(person.GetXrefName(), relationStack, depth, SanityCheckLimits.SanityProblemId.eventLimitMax_e, "Old at event, born " + birth.GetDate() + " event" + ev.GetEventType() + " " + ev.GetDate());
             }
           }
         }
@@ -952,28 +1040,27 @@ namespace FamilyStudioData.FamilyTreeStore
       string birthDate = null;
       string deathDate = null;
 
+      SanityCheckLimits.SanityProblemId birthEvType = SanityCheckLimits.SanityProblemId.unknownBirthDeath_e;
+      SanityCheckLimits.SanityProblemId deathEvType = SanityCheckLimits.SanityProblemId.unknownBirthDeath_e;
+
       if (birth != null)
       {
         switch (birth.GetDate().GetDateType())
         {
           case FamilyDateTimeClass.FamilyDateType.Unknown:
-            if (limits.unknownBirthDeath.active)
-            {
-              birthDate = "unknown";
-            }
+            birthDate = "Unknown";
+            birthEvType = SanityCheckLimits.SanityProblemId.unknownBirthDeath_e;
             break;
           case FamilyDateTimeClass.FamilyDateType.Year:
           case FamilyDateTimeClass.FamilyDateType.YearMonth:
           case FamilyDateTimeClass.FamilyDateType.DateString:
-            if (limits.inexactBirthDeath.active)
-            {
-              birthDate = "inexact";
-            }
+            birthDate = "Inexact";
+            birthEvType = SanityCheckLimits.SanityProblemId.inexactBirthDeath_e;
             break;
           default:
             break;
         }
-        if ((death != null) && limits.missingPartner.active)
+        if (death != null)
         {
           int personAge = ToYears(death.GetDate().ToDateTime() - birth.GetDate().ToDateTime());
           int ageToday = ToYears(DateTime.Now - birth.GetDate().ToDateTime());
@@ -985,17 +1072,15 @@ namespace FamilyStudioData.FamilyTreeStore
 
            if (spouseList == null)
             {
-              AddToList(person.GetXrefName(), relationStack, depth, "Person age " + personAge + " without partner");
+              AddToList(person.GetXrefName(), relationStack, depth, SanityCheckLimits.SanityProblemId.missingPartner_e, "Person age " + personAge + " without partner");
             }
           }
         }
       }
       else
       {
-        if (limits.unknownBirthDeath.active)
-        {
-          birthDate = "unknown";
-        }
+        birthDate = "Unknown";
+        birthEvType = SanityCheckLimits.SanityProblemId.unknownBirthDeath_e;
       }
 
       if (birth == null || (DateTime.Now > birth.GetDate().ToDateTime().AddYears(100)))
@@ -1005,18 +1090,14 @@ namespace FamilyStudioData.FamilyTreeStore
           switch (death.GetDate().GetDateType())
           {
             case FamilyDateTimeClass.FamilyDateType.Unknown:
-              if (limits.unknownBirthDeath.active)
-              {
-                deathDate = "unknown";
-              }
+              deathDate = "Unknown";
+              deathEvType = SanityCheckLimits.SanityProblemId.unknownBirthDeath_e;
               break;
             case FamilyDateTimeClass.FamilyDateType.Year:
             case FamilyDateTimeClass.FamilyDateType.YearMonth:
             case FamilyDateTimeClass.FamilyDateType.DateString:
-              if (limits.inexactBirthDeath.active)
-              {
-                deathDate = "inexact";
-              }
+              deathDate = "Inexact";
+              deathEvType = SanityCheckLimits.SanityProblemId.inexactBirthDeath_e;
               break;
             default:
               break;
@@ -1024,30 +1105,18 @@ namespace FamilyStudioData.FamilyTreeStore
         }
         else if (!person.GetIsAlive())
         {
-          if (limits.unknownBirthDeath.active)
-          {
-            deathDate = "unknown";
-          }
+          deathDate = "unknown";
+          deathEvType = SanityCheckLimits.SanityProblemId.unknownBirthDeath_e;
         }
       }
 
       if (birthDate != null)
       {
-        if (deathDate != null)
-        {
-          AddToList(person.GetXrefName(), relationStack, depth, birthDate + "  birth date and " + deathDate + " death date");
-        }
-        else
-        {
-          AddToList(person.GetXrefName(), relationStack, depth, birthDate + "  birth date");
-        }
+        AddToList(person.GetXrefName(), relationStack, depth, birthEvType, birthDate + " birth date" );
       }
-      else
+      if (deathDate != null)
       {
-        if (deathDate != null)
-        {
-          AddToList(person.GetXrefName(), relationStack, depth, deathDate + "  death date");
-        }
+        AddToList(person.GetXrefName(), relationStack, depth, deathEvType, deathDate + " death date");
       }
 
       if (limits.duplicateCheck.active)
@@ -1195,7 +1264,9 @@ namespace FamilyStudioData.FamilyTreeStore
                   RelationStack stack = relationStack.Duplicate();
 
                   CheckAndAddRelation(ref stack, family, parent);
-                  AddToList(parent.GetXrefName(), stack, depth + 1, "Parent young at marriage " + parent.GetName() + ",b:" + birth.GetDate());
+                  
+
+                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Parent young at marriage " + parent.GetName() + ",b:" + birth.GetDate());
                 }
               }
               if ((death != null) && death.GetDate().ValidDate())
@@ -1206,7 +1277,7 @@ namespace FamilyStudioData.FamilyTreeStore
                   {
                     RelationStack stack = relationStack.Duplicate();
                     CheckAndAddRelation(ref stack, family, parent);
-                    AddToList(parent.GetXrefName(), stack, depth + 1, "Marriage after death " + parent.GetName() + ",d:" + death.GetDate());
+                    AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Marriage after death " + parent.GetName() + ",d:" + death.GetDate());
                   }
                 }
               }
@@ -1216,7 +1287,7 @@ namespace FamilyStudioData.FamilyTreeStore
                 {
                   RelationStack stack = relationStack.Duplicate();
                   CheckAndAddRelation(ref stack, family, parent);
-                  AddToList(parent.GetXrefName(), stack, depth + 1, "More than one mother in family " + parent.GetName() + ",b:" + birth.GetDate());
+                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "More than one mother in family " + parent.GetName() + ",b:" + birth.GetDate());
                 }
                 mother.birth = birth.GetDate().ToDateTime();
                 mother.person = parent;
@@ -1231,7 +1302,7 @@ namespace FamilyStudioData.FamilyTreeStore
                 {
                   RelationStack stack = relationStack.Duplicate();
                   CheckAndAddRelation(ref stack, family, parent);
-                  AddToList(parent.GetXrefName(), stack, depth + 1, "More than one father in family " + parent.GetName() + ",b:" + birth.GetDate());
+                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "More than one father in family " + parent.GetName() + ",b:" + birth.GetDate());
                 }
                 father.birth = birth.GetDate().ToDateTime();
                 father.person = parent;
@@ -1253,20 +1324,20 @@ namespace FamilyStudioData.FamilyTreeStore
         {
           if (mother.person != null)
           {
-            if (limits.noOfChildrenMax.active && (limits.noOfChildrenMax.value < childList.Count))
+            if (limits.noOfChildrenMax.value < childList.Count)
             {
               //maxNoOfChildren = childList.Count;
               RelationStack stack = relationStack.Duplicate();
               CheckAndAddRelation(ref stack, family, mother.person);
-              AddToList(mother.person.GetXrefName(), stack, depth + 1, "Mother with many children " + childList.Count);
+              AddToList(mother.person.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.noOfChildrenMax_e, "Mother with many children " + childList.Count);
 
             }
-            if (limits.noOfChildrenMin.active && (limits.noOfChildrenMin.value >= childList.Count))
+            if (limits.noOfChildrenMin.value >= childList.Count)
             {
               //maxNoOfChildren = childList.Count;
               RelationStack stack = relationStack.Duplicate();
               CheckAndAddRelation(ref stack, family, mother.person);
-              AddToList(mother.person.GetXrefName(), stack, depth + 1, "Mother with few children " + childList.Count);
+              AddToList(mother.person.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.noOfChildrenMin_e, "Mother with few children " + childList.Count);
 
             }
           }
@@ -1292,7 +1363,7 @@ namespace FamilyStudioData.FamilyTreeStore
                       {
                         RelationStack stack = relationStack.Duplicate();
                         CheckAndAddRelation(ref stack, family, child);
-                        AddToList(child.GetXrefName(), stack, depth + 1, "Child born " + -yearsAfterMarriage + " years before marriage " + child.GetName() + ",b:" + birth.GetDate());
+                        AddToList(child.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Child born " + -yearsAfterMarriage + " years before marriage " + child.GetName() + ",b:" + birth.GetDate());
                       }
                     }
                     // Only compare those where we know at least birth month for close births...
@@ -1300,7 +1371,7 @@ namespace FamilyStudioData.FamilyTreeStore
                     {
                       birthDateList.Add(birth.GetDate().ToDateTime());
                     }
-                    if (limits.missingWeddingDate.active && (marriage == null))
+                    if (marriage == null)
                     {
                       trace.TraceInformation(" Missing marriage date " + family.GetXrefName());
                       RelationStack stack = relationStack.Duplicate();
@@ -1312,11 +1383,11 @@ namespace FamilyStudioData.FamilyTreeStore
                         {
                           extension = "with " + father.person.GetName();
                         }
-                        AddToList(mother.person.GetXrefName(), stack, depth, "Missing marriage date in family " + extension);
+                        AddToList(mother.person.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.missingWeddingDate_e, "Missing marriage date in family " + extension);
                       } else if (father != null)
                       {
                         CheckAndAddRelation(ref stack, family, father.person);
-                        AddToList(father.person.GetXrefName(), stack, depth, "Missing marriage date in family where this is the father");
+                        AddToList(father.person.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.missingWeddingDate_e, "Missing marriage date in family where this is the father");
                       }
                     }
                     if ((mother.death != DateTime.MinValue) && (ToYears(mother.death - birth.GetDate().ToDateTime()) < 0))
@@ -1326,9 +1397,9 @@ namespace FamilyStudioData.FamilyTreeStore
                       RelationStack stack = relationStack.Duplicate();
                       CheckAndAddRelation(ref stack, family, mother.person);
                       stack.Add(new Relation(Relation.Type.Child, child.GetXrefName()));
-                      AddToList(child.GetXrefName(), stack, depth, "Mother died " + ToYears(birth.GetDate().ToDateTime() - mother.death) + " years before birth.");
+                      AddToList(child.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Mother died " + ToYears(birth.GetDate().ToDateTime() - mother.death) + " years before birth.");
                     }
-                    else if (limits.motherLimitMax.active && (mother.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - mother.birth) > limits.motherLimitMax.value))
+                    else if ((mother.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - mother.birth) > limits.motherLimitMax.value))
                     {
                       //oldestParent = age;
                       trace.TraceInformation(" Old mother to child " + child.GetXrefName() + ":" + child.GetName() + " born " + birth.GetDate() + " mother born " + mother.birth.ToShortDateString());
@@ -1336,26 +1407,26 @@ namespace FamilyStudioData.FamilyTreeStore
                       RelationStack stack = relationStack.Duplicate();
                       CheckAndAddRelation(ref stack, family, mother.person);
                       stack.Add(new Relation(Relation.Type.Child, child.GetXrefName()));
-                      AddToList(child.GetXrefName(), stack, depth, "Old mother: " + ToYears(birth.GetDate().ToDateTime() - mother.birth) + " years at birth");
+                      AddToList(child.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.motherLimitMax_e, "Old mother: " + ToYears(birth.GetDate().ToDateTime() - mother.birth) + " years at birth");
 
                     }
-                    if (limits.parentLimitMin.active && (mother.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - mother.birth) < 0))
+                    if ((mother.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - mother.birth) < 0))
                     {
                       //youngestParent = age;
                       trace.TraceInformation(" Mother younger than child " + child.GetXrefName() + ":" + child.GetName() + birth.GetDate() + " at " + ToYears(birth.GetDate().ToDateTime() - mother.birth) + " years");
                       RelationStack stack = relationStack.Duplicate();
                       CheckAndAddRelation(ref stack, family, mother.person);
                       stack.Add(new Relation(Relation.Type.Child, child.GetXrefName()));
-                      AddToList(child.GetXrefName(), stack, depth, "Child born " + ToYears(mother.birth - birth.GetDate().ToDateTime()) + " years before mother");
+                      AddToList(child.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.parentLimitMin_e, "Child born " + ToYears(mother.birth - birth.GetDate().ToDateTime()) + " years before mother");
                     }
-                    else if (limits.parentLimitMin.active && (mother.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - mother.birth) < limits.parentLimitMin.value))
+                    else if ((mother.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - mother.birth) < limits.parentLimitMin.value))
                     {
                       //youngestParent = age;
                       trace.TraceInformation(" Young mother to child " + child.GetXrefName() + ":" + child.GetName() + birth.GetDate() + " at " + ToYears(birth.GetDate().ToDateTime() - mother.birth) + " years");
                       RelationStack stack = relationStack.Duplicate();
                       CheckAndAddRelation(ref stack, family, mother.person);
                       stack.Add(new Relation(Relation.Type.Child, child.GetXrefName()));
-                      AddToList(child.GetXrefName(), stack, depth, "Young mother: " + ToYears(birth.GetDate().ToDateTime() - mother.birth) + " years at birth");
+                      AddToList(child.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.parentLimitMin_e, "Young mother: " + ToYears(birth.GetDate().ToDateTime() - mother.birth) + " years at birth");
                     }
                     if ((father.death != DateTime.MinValue) && (ToMonths(father.death - birth.GetDate().ToDateTime()) < -8))
                     {
@@ -1365,9 +1436,9 @@ namespace FamilyStudioData.FamilyTreeStore
                       CheckAndAddRelation(ref stack, family, mother.person);
                       stack.Add(new Relation(Relation.Type.Child, child.GetXrefName()));
                       //AddToList(child.GetXrefName(), stack, depth, "Father died at " + father.parent.GetEvent(IndividualEventClass.EventType.Death).ToString(false));
-                      AddToList(child.GetXrefName(), stack, depth, "Father died " + ToMonths(birth.GetDate().ToDateTime() - father.death) + " months before birth.");
+                      AddToList(child.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Father died " + ToMonths(birth.GetDate().ToDateTime() - father.death) + " months before birth.");
                     }
-                    else if (limits.fatherLimitMax.active && (father.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - father.birth) > limits.fatherLimitMax.value))
+                    else if ((father.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - father.birth) > limits.fatherLimitMax.value))
                     {
                       //oldestParent = age;
                       trace.TraceInformation(" Old father to child " + child.GetXrefName() + ":" + child.GetName() + birth.GetDate() + " = " + father.birth.ToShortDateString() + " parent birth:");
@@ -1375,26 +1446,26 @@ namespace FamilyStudioData.FamilyTreeStore
                       RelationStack stack = relationStack.Duplicate();
                       CheckAndAddRelation(ref stack, family, mother.person);
                       stack.Add(new Relation(Relation.Type.Child, child.GetXrefName()));
-                      AddToList(child.GetXrefName(), stack, depth, "Old father: " + ToYears(birth.GetDate().ToDateTime() - father.birth) + " years at birth.");
+                      AddToList(child.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.fatherLimitMax_e, "Old father: " + ToYears(birth.GetDate().ToDateTime() - father.birth) + " years at birth.");
 
                     }
-                    if (limits.parentLimitMin.active && (father.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - father.birth) < 0))
+                    if ((father.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - father.birth) < 0))
                     {
                       //youngestParent = age;
                       trace.TraceInformation("Father younger than child " + child.GetXrefName() + ":" + child.GetName() + birth.GetDate() + " at " + ToYears(birth.GetDate().ToDateTime() - father.birth) + " years");
                       RelationStack stack = relationStack.Duplicate();
                       CheckAndAddRelation(ref stack, family, mother.person);
                       stack.Add(new Relation(Relation.Type.Child, child.GetXrefName()));
-                      AddToList(child.GetXrefName(), stack, depth, "Child born " + ToYears(father.birth - birth.GetDate().ToDateTime()) + " years before father");
+                      AddToList(child.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.parentLimitMin_e, "Child born " + ToYears(father.birth - birth.GetDate().ToDateTime()) + " years before father");
                     }
-                    else if (limits.parentLimitMin.active && (father.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - father.birth) < limits.parentLimitMin.value))
+                    else if ((father.birth != DateTime.MinValue) && (ToYears(birth.GetDate().ToDateTime() - father.birth) < limits.parentLimitMin.value))
                     {
                       //youngestParent = age;
                       trace.TraceInformation(" Young father to child " + child.GetXrefName() + ":" + child.GetName() + birth.GetDate() + " at " + ToYears(birth.GetDate().ToDateTime() - father.birth) + " years");
                       RelationStack stack = relationStack.Duplicate();
                       CheckAndAddRelation(ref stack, family, mother.person);
                       stack.Add(new Relation(Relation.Type.Child, child.GetXrefName()));
-                      AddToList(child.GetXrefName(), stack, depth, "Young father: " + ToYears(birth.GetDate().ToDateTime() - father.birth) + " years at birth");
+                      AddToList(child.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.parentLimitMin_e, "Young father: " + ToYears(birth.GetDate().ToDateTime() - father.birth) + " years at birth");
                     }
                   }
                 }
@@ -1411,21 +1482,18 @@ namespace FamilyStudioData.FamilyTreeStore
               {
                 if (birth.Subtract(lastBirth).Days <= 1)
                 {
-                  if (limits.twins.active)
-                  {
-                    RelationStack stack = relationStack.Duplicate();
-                    CheckAndAddRelation(ref stack, family, mother.person);
-                    //stack.RemoveLast();
-                    AddToList(mother.person.GetXrefName(), stack, depth + 1, "Twins born at " + birth);
-                  }
+                  RelationStack stack = relationStack.Duplicate();
+                  CheckAndAddRelation(ref stack, family, mother.person);
+                  //stack.RemoveLast();
+                  AddToList(mother.person.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.twins_e, "Twins born at " + birth);
                 }
-                else if (limits.daysBetweenChildren.active && (birth.Subtract(lastBirth).Days < limits.daysBetweenChildren.value))
+                else if ((birth.Subtract(lastBirth).Days < limits.daysBetweenChildren.value))
                 {
                   RelationStack stack = relationStack.Duplicate();
                   CheckAndAddRelation(ref stack, family, mother.person);
                   //stack.RemoveLast();
                   
-                  AddToList(mother.person.GetXrefName(), stack, depth + 1, "Close children found: Only " + birth.Subtract(lastBirth).Days + " days in between");
+                  AddToList(mother.person.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.daysBetweenChildren_e, "Close children found: Only " + birth.Subtract(lastBirth).Days + " days in between");
                 }
 
               }
@@ -1538,31 +1606,25 @@ namespace FamilyStudioData.FamilyTreeStore
         int noOfParents = NumberOfParents(person);
         if (noOfParents < 2)
         {
-          if (limits.parentsMissing.active)
+          if (noOfParents == 0)
           {
-            if (noOfParents == 0)
-            {
-              AddToList(person.GetXrefName().ToString(), relationStack, depth, "No parents");
-            }
-            else
-            {
-              AddToList(person.GetXrefName().ToString(), relationStack, depth, "Only one parent");
-            }
+            AddToList(person.GetXrefName().ToString(), relationStack, depth, SanityCheckLimits.SanityProblemId.parentsMissing_e, "No parents");
+          }
+          else
+          {
+            AddToList(person.GetXrefName().ToString(), relationStack, depth, SanityCheckLimits.SanityProblemId.parentsMissing_e, "Only one parent");
           }
         }
-        if (limits.parentsProblem.active)
+        if (noOfParents > 2)
         {
-          if (noOfParents > 2)
+          AddToList(person.GetXrefName().ToString(), relationStack, depth, SanityCheckLimits.SanityProblemId.parentsProblem_e, noOfParents + " parents");
+        }
+        IList<FamilyXrefClass> childFamilies = person.GetFamilyChildList();
+        if (childFamilies != null)
+        {
+          if (childFamilies.Count > 1)
           {
-            AddToList(person.GetXrefName().ToString(), relationStack, depth, noOfParents + " parents");
-          }
-          IList<FamilyXrefClass> childFamilies = person.GetFamilyChildList();
-          if(childFamilies != null)
-          {
-            if(childFamilies.Count > 1)
-            {
-              AddToList(person.GetXrefName().ToString(), relationStack, depth, "Child in " + childFamilies.Count + " families");
-            }
+            AddToList(person.GetXrefName().ToString(), relationStack, depth, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Child in " + childFamilies.Count + " families");
           }
         }
         if (depth < ancestorGenerationNo)
@@ -1636,10 +1698,7 @@ namespace FamilyStudioData.FamilyTreeStore
         }
         else
         {
-          if(limits.generationlimited.active)
-          {
-            AddToList(person.GetXrefName().ToString(), relationStack, depth, "Max depth, " + NumberOfParents(person) + " parents");
-          }
+          AddToList(person.GetXrefName().ToString(), relationStack, depth, SanityCheckLimits.SanityProblemId.generationlimited_e, "Max depth, " + NumberOfParents(person) + " parents");
         }
       }
       AnalyseDescendants(person, descendantGenerationNo, depth, progress, relationStack, Relation.Type.Person);
@@ -1681,11 +1740,11 @@ namespace FamilyStudioData.FamilyTreeStore
 
       foreach (string url in person2full.GetUrlList())
       {
-        AddToList(person1, thisRelationStack, thisGenerations, builder.ToString(), url);
+        AddToList(person1, thisRelationStack, thisGenerations, SanityCheckLimits.SanityProblemId.duplicateCheck_e, builder.ToString(), url);
       }
       if(person2full.GetUrlList().Count == 0)
       {
-        AddToList(person1, thisRelationStack, thisGenerations, builder.ToString());
+        AddToList(person1, thisRelationStack, thisGenerations, SanityCheckLimits.SanityProblemId.duplicateCheck_e, builder.ToString());
       }
 
     }
@@ -1857,7 +1916,7 @@ namespace FamilyStudioData.FamilyTreeStore
         {
           IndividualClass person = familyTree.GetIndividual(root.rootAncestor);
           //str += root.depth + " generations: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death) + Linefeed();
-          builder.Append(root.details + Linefeed());
+          builder.Append(root.GetDetailString(limits) + Linefeed());
           builder.Append(root.relationPath.ToString(familyTree) + Linefeed());
         }
       }
@@ -1914,11 +1973,14 @@ namespace FamilyStudioData.FamilyTreeStore
 
           if (urls.Count > 0)
           {
-            builder.Append("<tr><td><a href=\"" + urls[0] + "\">" + person.GetName() + "</a></td><td>" + GetEventDateString(person, IndividualEventClass.EventType.Birth) + "</td><td>" + GetEventDateString(person, IndividualEventClass.EventType.Death) + "</td><td>" + root.details + "</td><td>");
+            builder.Append("<tr><td><a href=\"" + urls[0] + "\">" + person.GetName() + "</a></td>" + 
+              "<td>" + GetEventDateString(person, IndividualEventClass.EventType.Birth) + "</td>"+
+              "<td>" + GetEventDateString(person, IndividualEventClass.EventType.Death) + "</td><td>" + root.GetDetailString(limits) + "</td><td>");
           }
           else
           {
-            builder.Append("<tr><td>" + person.GetName() + "</td><td>" + GetEventDateString(person, IndividualEventClass.EventType.Birth) + "</td><td>" + GetEventDateString(person, IndividualEventClass.EventType.Death) + "</td><td>" + root.details + "</td><td>");
+            builder.Append("<tr><td>" + person.GetName() + "</td><td>" + GetEventDateString(person, IndividualEventClass.EventType.Birth) + "</td><td>" 
+              + GetEventDateString(person, IndividualEventClass.EventType.Death) + "</td><td>" + root.GetDetailString(limits) + "</td><td>");
           }
 
           int dupIx = 1;

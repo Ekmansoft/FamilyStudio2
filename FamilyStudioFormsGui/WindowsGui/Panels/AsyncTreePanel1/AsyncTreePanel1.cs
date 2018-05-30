@@ -49,7 +49,12 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.AsyncTreePanel1
 
     private void UpdateIndividualSync(string xref, IndividualClass person)
     {
-      if(xref != person.GetXrefName())
+      if(person == null)
+      {
+        trace.TraceData(TraceEventType.Error, 0, "Requested person is null!" + xref);
+        return;
+      }
+      if (xref != person.GetXrefName())
       {
         trace.TraceData(TraceEventType.Error, 0, "Requested person doesn't match response!" + xref + "!=" + person.GetXrefName());
       }

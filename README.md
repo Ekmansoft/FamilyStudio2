@@ -9,13 +9,14 @@ editing family relations, but on tools for analysing and comparing whole genealo
 
 Thus here are a few features that are supported:
 - Importing and exporting GEDCOM files from any source.
-- Importing ANARKIV data files.
+- Importing ANARKIV data files. (experimental)
 - Connecting to the web tree Geni.com live, and performing the same operations on Geni.com as on local trees (read-only).
 - Possibility to export cached data from geni.com as native or gedcom files.
 - Saving and reading an internal file format (xml so far).
 - Comparing whole trees from any source. Suspicious matches can easily be compared for easy manual transfer between the trees.
 - Sanity check of any tree to a limited number of generations up to 19 generations, or an infinite number of generations. 
   Note that this can take quite some time if running against a web tree and many generations are selected.
+- Checking for duplicate profiles in any tree. (This can take a long time especially against geni.com)
 
 For a ready-built version, see http://endian.net/FamilyStudio/publish.htm
 
@@ -29,6 +30,7 @@ TODO: Guide users through getting your code up and running on their own system. 
       This app key  includes an app id and an app secret that needs to be entered in the registry as strings at 
             HKEY_CURRENT_USER\\Software\\endian.net\\FamilyStudio\\GeniAppId
             HKEY_CURRENT_USER\\Software\\endian.net\\FamilyStudio\\GeniAppSecret
+      If you try to open a geni.com without this, it will ask you for the values. 
 
 2.	Software dependencies
 3.	Latest releases

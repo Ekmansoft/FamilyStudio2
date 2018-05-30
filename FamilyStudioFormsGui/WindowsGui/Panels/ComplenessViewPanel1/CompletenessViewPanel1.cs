@@ -42,6 +42,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
     private FamilyUtility utility;
     private TraceSource trace;
     private SanitySettingsForm settings;
+    private SanityCheckLimits limits;
 
     public override void PasteFromClipboard(object clipboard)
     {
@@ -104,6 +105,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
           limits.duplicateCheck = new SanityProperty();
           limits.duplicateCheck.active = false;
         }
+        limits.CreateArray();
 
         if (delete)
         {
@@ -132,7 +134,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       storeSettings.Close();
     }
 
-    void AddItemToListView(AncestorLineInfo ancestor)
+    void AddItemToListView(AncestorLineInfo ancestor, SanityCheckLimits limits)
     {
       IndividualClass person = familyTree.GetIndividual(ancestor.rootAncestor);
       if (person != null)
@@ -148,18 +150,22 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
             resultList.Items.Remove(oldItem);
           }
         }
+        string detailString = ancestor.GetDetailString(limits);
 
-        ListViewItem item = new ListViewItem(person.GetName());
-        item.SubItems.AddRange(new string[] { ancestor.depth.ToString(), ancestor.relationPath.GetDistance(), person.GetDate(IndividualEventClass.EventType.Birth).ToString(), person.GetDate(IndividualEventClass.EventType.Death).ToString(), ancestor.details });
-        item.ToolTipText = ancestor.relationPath.ToString(familyTree);
-        item.Tag = person.GetXrefName();
+        if (detailString.Length > 0)
+        {
+          ListViewItem item = new ListViewItem(person.GetName());
+          item.SubItems.AddRange(new string[] { ancestor.depth.ToString(), ancestor.relationPath.GetDistance(), person.GetDate(IndividualEventClass.EventType.Birth).ToString(), person.GetDate(IndividualEventClass.EventType.Death).ToString(), detailString });
+          item.ToolTipText = ancestor.relationPath.ToString(familyTree);
+          item.Tag = person.GetXrefName();
 
-        resultList.Items.Add(item);
+          resultList.Items.Add(item);
+        }
         //list.Items.
       }
       else
       {
-        trace.TraceEvent(TraceEventType.Error, 0, " Error could not fetch " + ancestor.rootAncestor + " from tree " + ancestor.depth + " generations " + ancestor.details);
+        trace.TraceEvent(TraceEventType.Error, 0, " Error could not fetch " + ancestor.rootAncestor + " from tree " + ancestor.depth + " generations " + ancestor.GetDetailString(limits));
       }
     }
 
@@ -167,13 +173,16 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
     {
       bool disableCounter = true;
       {
-        IEnumerable<AncestorLineInfo> query = stats.GetAncestorList().OrderBy(ancestor => ancestor.depth);
-
         resultList.Items.Clear();
-
-        foreach (AncestorLineInfo root in query)
+        if (stats != null)
         {
-          AddItemToListView(root);
+          IEnumerable<AncestorLineInfo> query = stats.GetAncestorList().OrderBy(ancestor => ancestor.depth);
+
+          //SanityCheckLimits limits = GetSanitySettings(utility.GetCurrentDirectory() + "\\SanitySettings.fssan");
+          foreach (AncestorLineInfo root in query)
+          {
+            AddItemToListView(root, limits);
+          }
         }
       }
 
@@ -301,6 +310,9 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       descendantGenerationNoCtrl.Width = 100;
       this.Controls.Add(descendantGenerationNoCtrl);
 
+      stopButton.Enabled = false;
+      //stopButton.
+
       resultList = new ListView();
 
       resultList.Top = startButton.Bottom;
@@ -347,9 +359,12 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       exportItem.MouseUp += ContextMenuStrip_SelectExport;
       resultList.ContextMenuStrip.Items.Add(exportItem);*/
 
-      utility = new FamilyUtility();
 
       this.Controls.Add(resultList);
+
+      utility = new FamilyUtility();
+
+      limits = GetSanitySettings(utility.GetCurrentDirectory() + "\\SanitySettings.fssan");
 
       trace.TraceInformation("CompletenessViewPanel1::CompletenessViewPanel1()");
 
@@ -641,6 +656,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
       if(newLimits != null)
       {
         SetSanitySettings(utility.GetCurrentDirectory() + "\\SanitySettings.fssan", newLimits);
+        limits = newLimits;
+        AddToListView(ref resultList, stats);
       }
       settings = null;
     }
@@ -654,7 +671,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         {
           settings = new SanitySettingsForm();
 
-          SanityCheckLimits limits = GetSanitySettings(utility.GetCurrentDirectory() + "\\SanitySettings.fssan");
+          limits = GetSanitySettings(utility.GetCurrentDirectory() + "\\SanitySettings.fssan");
           settings.Update(limits, SettingsUpdateHandlerFcn);
         }
       }
@@ -664,11 +681,11 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
     {
       if (resultList.InvokeRequired)
       {
-        Invoke(new Action(() => AddItemToListView(ancestor)));
+        Invoke(new Action(() => AddItemToListView(ancestor, limits)));
       }
       else
       {
-        AddItemToListView(ancestor);
+        AddItemToListView(ancestor, limits);
       }
     }
 
@@ -692,7 +709,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         int ancestorGenerations = GetSelectedInt(ancestorGenerationNoCtrl);
         int descendantGenerationNo = GetSelectedInt(descendantGenerationNoCtrl);
 
-        SanityCheckLimits limits = GetSanitySettings(utility.GetCurrentDirectory() + "\\SanitySettings.fssan");
+        //limits = GetSanitySettings(utility.GetCurrentDirectory() + "\\SanitySettings.fssan");
 
         progressReporter = new AsyncWorkerProgress(CompletenessProgress);
 
