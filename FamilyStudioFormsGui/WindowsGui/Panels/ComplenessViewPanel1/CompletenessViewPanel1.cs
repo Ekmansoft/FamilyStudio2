@@ -94,6 +94,11 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
           limits.missingWeddingDate = new SanityProperty();
           limits.missingWeddingDate.active = true;
         }
+        if (limits.marriageProblem == null)
+        {
+          limits.marriageProblem = new SanityProperty();
+          limits.marriageProblem.active = true;
+        }
         if (limits.missingPartner == null)
         {
           limits.missingPartner = new SanityProperty();

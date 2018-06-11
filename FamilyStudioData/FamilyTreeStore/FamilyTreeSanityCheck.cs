@@ -166,6 +166,8 @@ namespace FamilyStudioData.FamilyTreeStore
     [DataMember]
     public SanityProperty missingWeddingDate;
     [DataMember]
+    public SanityProperty marriageProblem;
+    [DataMember]
     public SanityProperty missingPartner;
     [DataMember]
     public SanityProperty generationlimited;
@@ -189,6 +191,7 @@ namespace FamilyStudioData.FamilyTreeStore
       unknownBirthDeath_e,
       parentsMissing_e,
       parentsProblem_e,
+      marriageProblem_e,
       missingWeddingDate_e,
       missingPartner_e,
       generationlimited_e,
@@ -248,6 +251,9 @@ namespace FamilyStudioData.FamilyTreeStore
       missingWeddingDate = new SanityProperty();
       missingWeddingDate.active = true;
 
+      marriageProblem = new SanityProperty();
+      marriageProblem.active = true;
+
       missingPartner = new SanityProperty();
       missingPartner.value = 115;
       missingPartner.active = true;
@@ -275,6 +281,7 @@ namespace FamilyStudioData.FamilyTreeStore
       sanityArray.Add(SanityProblemId.unknownBirthDeath_e, unknownBirthDeath);
       sanityArray.Add(SanityProblemId.parentsMissing_e, parentsMissing);
       sanityArray.Add(SanityProblemId.parentsProblem_e, parentsProblem);
+      sanityArray.Add(SanityProblemId.marriageProblem_e, marriageProblem);
       sanityArray.Add(SanityProblemId.missingWeddingDate_e, missingWeddingDate);
       sanityArray.Add(SanityProblemId.missingPartner_e, missingPartner);
       sanityArray.Add(SanityProblemId.generationlimited_e, generationlimited);
@@ -859,6 +866,8 @@ namespace FamilyStudioData.FamilyTreeStore
     [DataMember]
     private IList<string> analysedFamilies;
     [DataMember]
+    private IList<string> sanityCheckedFamilies;
+    [DataMember]
     private IList<string> analysedPeople;
     [DataMember]
     private IList<HandledItem> analysedFamiliesNo;
@@ -897,6 +906,7 @@ namespace FamilyStudioData.FamilyTreeStore
       ancestorGenerationNo = ancestorGenerations;
 
       analysedFamilies = new List<string>();
+      sanityCheckedFamilies = new List<string>();
       analysedPeople = new List<string>();
       analysedFamiliesNo = new List<HandledItem>();
       analysedPeopleNo = new List<HandledItem>();
@@ -1070,9 +1080,27 @@ namespace FamilyStudioData.FamilyTreeStore
           {
             IList<FamilyXrefClass> spouseList = person.GetFamilySpouseList();
 
-           if (spouseList == null)
+            if (spouseList == null)
             {
-              AddToList(person.GetXrefName(), relationStack, depth, SanityCheckLimits.SanityProblemId.missingPartner_e, "Person age " + personAge + " without partner");
+              IList<NoteClass> notes = person.GetNoteList();
+              bool unmarried = false;
+              string append = "";
+
+              if (notes != null)
+              {
+                foreach (NoteClass note in notes)
+                {
+                  if ((note.note.ToLower().IndexOf("ogift") >= 0) || (note.note.ToLower().IndexOf("unmarried") >= 0))
+                  {
+                    unmarried = true;
+                  }
+                }
+                if (unmarried)
+                {
+                  append = " (Note: Unmarried)";
+                }
+              }
+              AddToList(person.GetXrefName(), relationStack, depth, SanityCheckLimits.SanityProblemId.missingPartner_e, "Person age " + personAge + " without partner" + append);
             }
           }
         }
@@ -1226,7 +1254,7 @@ namespace FamilyStudioData.FamilyTreeStore
     }
 
 
-  public void SanityCheckFamily(FamilyClass family, RelationStack relationStack, int depth)
+    public void SanityCheckFamily(FamilyClass family, RelationStack relationStack, int depth)
     {
       //DateTime oldestParentBirth = DateTime.MaxValue;
       //DateTime youngestParentBirth = DateTime.MinValue;
@@ -1235,6 +1263,12 @@ namespace FamilyStudioData.FamilyTreeStore
       DateTime fatherBirth = DateTime.MinValue;
       IndividualClass mother = null;
       IndividualClass father = null;*/
+
+      if(sanityCheckedFamilies.Contains(family.GetXrefName()))
+      {
+        return;
+      }
+      sanityCheckedFamilies.Add(family.GetXrefName());
       ParentInfo mother = new ParentInfo();
       ParentInfo father = new ParentInfo();
       IndividualEventClass marriage = family.GetEvent(IndividualEventClass.EventType.FamMarriage);
@@ -1259,14 +1293,14 @@ namespace FamilyStudioData.FamilyTreeStore
             {
               if (marriage != null)
               {
-                if (ToYears(marriage.GetDate().ToDateTime() - birth.GetDate().ToDateTime()) < 16)
+                int ageAtMarriage = ToYears(marriage.GetDate().ToDateTime() - birth.GetDate().ToDateTime());
+                if (ageAtMarriage < 16)
                 {
                   RelationStack stack = relationStack.Duplicate();
 
-                  CheckAndAddRelation(ref stack, family, parent);
-                  
+                  CheckAndAddRelation(ref stack, family, parent);                  
 
-                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Parent young at marriage " + parent.GetName() + ",b:" + birth.GetDate());
+                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.marriageProblem_e, "Spouse only " + ageAtMarriage + " years old at marriage");
                 }
               }
               if ((death != null) && death.GetDate().ValidDate())
@@ -1277,7 +1311,7 @@ namespace FamilyStudioData.FamilyTreeStore
                   {
                     RelationStack stack = relationStack.Duplicate();
                     CheckAndAddRelation(ref stack, family, parent);
-                    AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Marriage after death " + parent.GetName() + ",d:" + death.GetDate());
+                    AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.marriageProblem_e, "Marriage after death");
                   }
                 }
               }
@@ -1287,7 +1321,7 @@ namespace FamilyStudioData.FamilyTreeStore
                 {
                   RelationStack stack = relationStack.Duplicate();
                   CheckAndAddRelation(ref stack, family, parent);
-                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "More than one mother in family " + parent.GetName() + ",b:" + birth.GetDate());
+                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "More than one mother in family");
                 }
                 mother.birth = birth.GetDate().ToDateTime();
                 mother.person = parent;
@@ -1302,7 +1336,7 @@ namespace FamilyStudioData.FamilyTreeStore
                 {
                   RelationStack stack = relationStack.Duplicate();
                   CheckAndAddRelation(ref stack, family, parent);
-                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "More than one father in family " + parent.GetName() + ",b:" + birth.GetDate());
+                  AddToList(parent.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "More than one father in family");
                 }
                 father.birth = birth.GetDate().ToDateTime();
                 father.person = parent;
@@ -1363,7 +1397,7 @@ namespace FamilyStudioData.FamilyTreeStore
                       {
                         RelationStack stack = relationStack.Duplicate();
                         CheckAndAddRelation(ref stack, family, child);
-                        AddToList(child.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Child born " + -yearsAfterMarriage + " years before marriage " + child.GetName() + ",b:" + birth.GetDate());
+                        AddToList(child.GetXrefName(), stack, depth + 1, SanityCheckLimits.SanityProblemId.parentsProblem_e, "Child born " + -yearsAfterMarriage + " years before marriage");
                       }
                     }
                     // Only compare those where we know at least birth month for close births...
@@ -1735,8 +1769,6 @@ namespace FamilyStudioData.FamilyTreeStore
       builder.Append(" - ");
       builder.Append(GetEventDateString(person2full, IndividualEventClass.EventType.Death));
       builder.Append(")");
-
-      //AddToList(person1, thisRelationStack, 0, "Duplicate " + person1 + " " + person2 + " " + person1full.GetName().ToString() + " " + person2full.GetName().ToString());      
 
       foreach (string url in person2full.GetUrlList())
       {

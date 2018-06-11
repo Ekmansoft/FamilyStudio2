@@ -49,7 +49,7 @@ namespace FamilyStudioData.FamilyTreeStore
 
     static string NormalizeName(string name)
     {
-      return name.ToLower().Replace("ch", "k").Replace("w", "v").Replace("  ", " ").Replace("*", "").Replace("å", "a").Replace("ä", "a").Replace("ö", "o");
+      return name.ToLower().Replace("w", "v").Replace("  ", " ").Replace("*", "").Replace("å", "a").Replace("ä", "a").Replace("ö", "o");
     }
 
     static bool IsNamesEqual(string name1, string name2)

@@ -54,6 +54,7 @@
       this.missingPartnerCheckBox = new System.Windows.Forms.CheckBox();
       this.duplicatesCheckBox = new System.Windows.Forms.CheckBox();
       this.missingPartnerMinAgeUpDown = new System.Windows.Forms.NumericUpDown();
+      this.marriageProblemCheckBox = new System.Windows.Forms.CheckBox();
       ((System.ComponentModel.ISupportInitialize)(this.minParentsNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.maxMothersNumericUpDown)).BeginInit();
       ((System.ComponentModel.ISupportInitialize)(this.maxFathersNumericUpDown)).BeginInit();
@@ -268,7 +269,7 @@
       // 
       // okButton
       // 
-      this.okButton.Location = new System.Drawing.Point(16, 504);
+      this.okButton.Location = new System.Drawing.Point(16, 537);
       this.okButton.Name = "okButton";
       this.okButton.Size = new System.Drawing.Size(98, 39);
       this.okButton.TabIndex = 25;
@@ -299,14 +300,14 @@
       // duplicatesCheckBox
       // 
       this.duplicatesCheckBox.AutoSize = true;
-      this.duplicatesCheckBox.Location = new System.Drawing.Point(16, 464);
+      this.duplicatesCheckBox.Location = new System.Drawing.Point(16, 494);
       this.duplicatesCheckBox.Name = "duplicatesCheckBox";
       this.duplicatesCheckBox.Size = new System.Drawing.Size(110, 24);
       this.duplicatesCheckBox.TabIndex = 28;
       this.duplicatesCheckBox.Text = "Duplicates";
       this.duplicatesCheckBox.UseVisualStyleBackColor = true;
       // 
-      // missingPartnerEndYearUpDown1
+      // missingPartnerMinAgeUpDown
       // 
       this.missingPartnerMinAgeUpDown.Location = new System.Drawing.Point(202, 401);
       this.missingPartnerMinAgeUpDown.Maximum = new decimal(new int[] {
@@ -314,15 +315,26 @@
             0,
             0,
             0});
-      this.missingPartnerMinAgeUpDown.Name = "missingPartnerEndYearUpDown1";
+      this.missingPartnerMinAgeUpDown.Name = "missingPartnerMinAgeUpDown";
       this.missingPartnerMinAgeUpDown.Size = new System.Drawing.Size(120, 26);
       this.missingPartnerMinAgeUpDown.TabIndex = 29;
+      // 
+      // marriageProblemCheckBox
+      // 
+      this.marriageProblemCheckBox.AutoSize = true;
+      this.marriageProblemCheckBox.Location = new System.Drawing.Point(16, 464);
+      this.marriageProblemCheckBox.Name = "marriageProblemCheckBox";
+      this.marriageProblemCheckBox.Size = new System.Drawing.Size(166, 24);
+      this.marriageProblemCheckBox.TabIndex = 30;
+      this.marriageProblemCheckBox.Text = "Marriage problems";
+      this.marriageProblemCheckBox.UseVisualStyleBackColor = true;
       // 
       // SanitySettingsForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(340, 555);
+      this.ClientSize = new System.Drawing.Size(340, 590);
+      this.Controls.Add(this.marriageProblemCheckBox);
       this.Controls.Add(this.missingPartnerMinAgeUpDown);
       this.Controls.Add(this.duplicatesCheckBox);
       this.Controls.Add(this.missingPartnerCheckBox);
@@ -393,5 +405,6 @@
     private System.Windows.Forms.CheckBox missingPartnerCheckBox;
     private System.Windows.Forms.CheckBox duplicatesCheckBox;
     private System.Windows.Forms.NumericUpDown missingPartnerMinAgeUpDown;
+    private System.Windows.Forms.CheckBox marriageProblemCheckBox;
   }
 }
