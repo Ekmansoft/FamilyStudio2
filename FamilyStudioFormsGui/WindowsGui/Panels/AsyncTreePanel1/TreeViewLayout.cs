@@ -107,6 +107,10 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.AsyncTreePanel1
       bLayout.generation = parentButtonLayout.generation;
       bLayout.size = this.familySize;
       bLayout.position = retPoint;
+      if (parentButtonLayout.generation < 2)
+      {
+        bLayout.position.Y += this.personSize.Height / 2;
+      }
       trace.TraceInformation("AddChildFamilyButton()g:" + bLayout.generation + " " + parentButtonLayout.childNo + " " + parentPosition + " " + retPoint);
       return true;
     }
@@ -141,6 +145,11 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.AsyncTreePanel1
       }
       bLayout.size = this.personSize;
       bLayout.position = retPoint;
+      if ((parentButtonLayout == null) || ((parentButtonLayout != null) && (parentButtonLayout.generation == 0)))
+      {
+        bLayout.position.Y -= bLayout.size.Height / 2;
+        bLayout.size.Height = bLayout.size.Height * 2;
+      }
       return true;
     }
   }

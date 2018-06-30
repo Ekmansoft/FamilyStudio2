@@ -161,7 +161,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         {
           ListViewItem item = new ListViewItem(person.GetName());
           item.SubItems.AddRange(new string[] { ancestor.depth.ToString(), ancestor.relationPath.GetDistance(), person.GetDate(IndividualEventClass.EventType.Birth).ToString(), person.GetDate(IndividualEventClass.EventType.Death).ToString(), detailString });
-          item.ToolTipText = ancestor.relationPath.ToString(familyTree);
+          item.ToolTipText = ancestor.relationPath.ToString(familyTree, false);
           item.Tag = person.GetXrefName();
 
           resultList.Items.Add(item);
@@ -212,9 +212,9 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
               {
                 if(stack != null)
                 {
-                  lvItem.ToolTipText += stack.ToString(familyTree);
+                  lvItem.ToolTipText += stack.ToString(familyTree, false);
                   lvItem.ToolTipText += "\n";
-                  trace.TraceInformation(stack.ToString(familyTree));
+                  trace.TraceInformation(stack.ToString(familyTree, false));
                 }
               }
 
@@ -440,36 +440,39 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.CompletenessViewPanel1
         if (parentForm != null)
         {
           string selectedPerson = parentForm.GetSelectedIndividual();
-          IndividualClass individual = familyTree.GetIndividual(selectedPerson);
-          if (individual != null)
+          if (selectedPerson != null)
           {
-            IList<string> urlList = individual.GetUrlList();
-            if (urlList != null)
+            IndividualClass individual = familyTree.GetIndividual(selectedPerson);
+            if (individual != null)
             {
-              foreach (string url in urlList)
+              IList<string> urlList = individual.GetUrlList();
+              if (urlList != null)
               {
-                menu.MenuItems.Add(new MenuItem(url, ResultList_Url_Click));
+                foreach (string url in urlList)
+                {
+                  menu.MenuItems.Add(new MenuItem(url, ResultList_Url_Click));
+                }
               }
             }
-          }
-          trace.TraceData(TraceEventType.Warning, 0, "selectedperson = " + selectedPerson);
+            trace.TraceData(TraceEventType.Warning, 0, "selectedperson = " + selectedPerson);
 
-          if (stats != null)
-          {
-            AncestorLineInfo selected = stats.GetAncestor(selectedPerson);
-
-            if (selected != null)
+            if (stats != null)
             {
-              trace.TraceData(TraceEventType.Warning, 0, "selected = " + selected + " dups=" + selected.duplicate.Count);
+              AncestorLineInfo selected = stats.GetAncestor(selectedPerson);
 
-              foreach (string duplicate in selected.duplicate)
+              if (selected != null)
               {
-                menu.MenuItems.Add(new MenuItem(duplicate, ResultList_Url_Click));
+                trace.TraceData(TraceEventType.Warning, 0, "selected = " + selected + " dups=" + selected.duplicate.Count);
+
+                foreach (string duplicate in selected.duplicate)
+                {
+                  menu.MenuItems.Add(new MenuItem(duplicate, ResultList_Url_Click));
+                }
               }
-            }
-            else
-            {
-              trace.TraceData(TraceEventType.Warning, 0, "selected = null");
+              else
+              {
+                trace.TraceData(TraceEventType.Warning, 0, "selected = null");
+              }
             }
           }
         }

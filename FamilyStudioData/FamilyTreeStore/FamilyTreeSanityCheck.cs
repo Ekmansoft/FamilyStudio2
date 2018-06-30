@@ -324,56 +324,69 @@ namespace FamilyStudioData.FamilyTreeStore
     {
       return this.type + ":" + this.personXref;
     }
-    public string ToString(FamilyTreeStoreBaseClass familyTree = null, bool showRelation = true)
+    public string ToString(FamilyTreeStoreBaseClass familyTree, bool showRelation, bool html)
     {
-      if (familyTree != null)
+      IndividualClass person = familyTree.GetIndividual(personXref);
+      StringBuilder builder = new StringBuilder();
+
+      if (person != null)
       {
-        IndividualClass person = familyTree.GetIndividual(personXref);
-
-        if(person != null)
+        //string str = this.type + ":" + personXref + "= " + person.GetName().ToString() + " (";
+        //string str = "";
+        string url = null;
+        if (html)
         {
-          //string str = this.type + ":" + personXref + "= " + person.GetName().ToString() + " (";
-          string str = "";
-
-          if (showRelation)
+          IList<string> urls = person.GetUrlList();
+          if (urls.Count > 0)
           {
-            str += this.type + ":";
+            url = urls[0];
           }
-          str += person.GetName().ToString() + " (";
-          {
-            IndividualEventClass ev = person.GetEvent(IndividualEventClass.EventType.Birth);
-            if (ev != null)
-            {
-              FamilyDateTimeClass evDate = ev.GetDate();
-
-              if (evDate != null)
-              {
-                str += evDate.ToString();
-              }
-
-            }
-          }
-          str += " - ";
-          {
-            IndividualEventClass ev = person.GetEvent(IndividualEventClass.EventType.Death);
-            if (ev != null)
-            {
-              FamilyDateTimeClass evDate = ev.GetDate();
-
-              if (evDate != null)
-              {
-                str += evDate.ToString();
-              }
-
-            }
-          }
-          str += ")";
-
-
-          return str;
         }
+
+        if (showRelation)
+        {
+          builder.Append(this.type + ":");
+        }
+        if (url != null)
+        {
+          builder.Append("<a href=\"" + url + "\">");
+        }
+        builder.Append(person.GetName().ToString());
+        if (url != null)
+        {
+          builder.Append("</a>");
+        }
+
+        builder.Append(" (");
+        {
+          IndividualEventClass ev = person.GetEvent(IndividualEventClass.EventType.Birth);
+          if (ev != null)
+          {
+            FamilyDateTimeClass evDate = ev.GetDate();
+
+            if (evDate != null)
+            {
+              builder.Append(evDate.ToString());
+            }
+          }
+        }
+        builder.Append(" - ");
+        {
+          IndividualEventClass ev = person.GetEvent(IndividualEventClass.EventType.Death);
+          if (ev != null)
+          {
+            FamilyDateTimeClass evDate = ev.GetDate();
+
+            if (evDate != null)
+            {
+              builder.Append(evDate.ToString());
+            }
+
+          }
+        }
+        builder.Append(")");
       }
-      return this.type + ":" + this.personXref + " (no tree data)";
+      return builder.ToString();
     }
     static public Relation.Type GetChildRelation(IndividualClass person)
     {
@@ -419,17 +432,25 @@ namespace FamilyStudioData.FamilyTreeStore
   [CollectionDataContract]
   public class RelationStack : List<Relation>
   {
-    public string ToString(FamilyTreeStoreBaseClass familyTree = null)
+    public string ToString(FamilyTreeStoreBaseClass familyTree, bool html)
     {
       StringBuilder strBuilder = new StringBuilder();
-      strBuilder.Append(CalculateRelation(familyTree) + FamilyUtility.GetLinefeed());
+      strBuilder.Append(CalculateRelation(familyTree, html) + Linefeed(html));
 
 
       foreach (Relation relation in this)
       {
-        strBuilder.Append("  " + relation.ToString(familyTree) + FamilyUtility.GetLinefeed());
+        strBuilder.Append("  " + relation.ToString(familyTree, true, html) + Linefeed(html));
       }
       return strBuilder.ToString();
+    }
+    private string Linefeed(bool html = false)
+    {
+      if (html)
+      {
+        return "<br/>" + FamilyUtility.GetLinefeed();
+      }
+      return FamilyUtility.GetLinefeed();
     }
 
     public RelationStack Duplicate()
@@ -506,7 +527,7 @@ namespace FamilyStudioData.FamilyTreeStore
         this.RemoveAt(this.Count - 1);
       }
     }
-    public string CalculateRelation(FamilyTreeStoreBaseClass familyTree = null)
+    public string CalculateRelation(FamilyTreeStoreBaseClass familyTree, bool html)
     {
       int rootIndex = 0;
 
@@ -635,11 +656,11 @@ namespace FamilyStudioData.FamilyTreeStore
       {
         if (!directAncestor)
         {
-          str += " with common ancestor: " + this[rootIndex].ToString(familyTree, false);
+          str += " with common ancestor: " + this[rootIndex].ToString(familyTree, false, html);
         }
         else
         {
-          str += " direct descendant from " + this[rootIndex].ToString(familyTree, false);
+          str += " direct descendant from " + this[rootIndex].ToString(familyTree, false, html);
         }
       }
       return str;
@@ -662,29 +683,42 @@ namespace FamilyStudioData.FamilyTreeStore
       relations = new List<RelationStack>();
     }
 
-    private string Linefeed()
+    private string Linefeed(bool html = false)
     {
+      if(html)
+      {
+        return "<br/>" + FamilyUtility.GetLinefeed();
+      }
       return FamilyUtility.GetLinefeed();
     }
 
-    public string ToString(FamilyTreeStoreBaseClass familyTree = null)
+    public string ToString(FamilyTreeStoreBaseClass familyTree, bool html)
     {
       StringBuilder strBuilder = new StringBuilder();
+
+      if(html)
+      {
+        strBuilder.Append("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"/><title> Relations </title ></head ><body>" + Linefeed());
+      }
 
       if(sourceTree != null)
       {
         strBuilder.Append(sourceTree);
       }
-      strBuilder.Append(Linefeed());
+      strBuilder.Append(Linefeed(html));
       if (time != null)
       {
         strBuilder.Append(time.ToString());
       }
-      strBuilder.Append(Linefeed());
+      strBuilder.Append(Linefeed(html));
 
       foreach(RelationStack rel in relations)
       {
-        strBuilder.Append(rel.ToString(familyTree));
+        strBuilder.Append(rel.ToString(familyTree, html));
+      }
+      if (html)
+      {
+        strBuilder.Append("</body></html>" + Linefeed());
       }
 
       return strBuilder.ToString();
@@ -983,7 +1017,7 @@ namespace FamilyStudioData.FamilyTreeStore
     public void AddToList(string rootAncestor, RelationStack relationStack, int depth, SanityCheckLimits.SanityProblemId id, string description, string url = null)
     {
       trace.TraceInformation("AddToList(" + rootAncestor + "," + depth + "," + description + "," + relationStack.Count + ")");
-      trace.TraceInformation(relationStack.ToString(familyTree));
+      trace.TraceInformation(relationStack.ToString(familyTree, false));
 
       if (ancestorList.ContainsKey(rootAncestor))
       {
@@ -1349,6 +1383,26 @@ namespace FamilyStudioData.FamilyTreeStore
 
           }
         }
+        if (marriage == null)
+        {
+          trace.TraceInformation(" Missing marriage date " + family.GetXrefName());
+          RelationStack stack = relationStack.Duplicate();
+          if (mother.person != null)
+          {
+            String extension = "where this is the mother";
+            CheckAndAddRelation(ref stack, family, mother.person);
+            if (father.person != null)
+            {
+              extension = "with " + father.person.GetName();
+            }
+            AddToList(mother.person.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.missingWeddingDate_e, "Missing marriage date in family " + extension);
+          }
+          else if (father.person != null)
+          {
+            CheckAndAddRelation(ref stack, family, father.person);
+            AddToList(father.person.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.missingWeddingDate_e, "Missing marriage date in family where this is the father");
+          }
+        }
         /*if (maxNoOfParents < parentList.Count)
         {
           maxNoOfParents = parentList.Count;
@@ -1388,7 +1442,7 @@ namespace FamilyStudioData.FamilyTreeStore
 
                 if (birth != null)
                 {
-                  if (birth.GetDate().ValidDate())
+                  if (birth.GetDate().ValidDate() && (childXref.GetPedigreeType() == PedigreeType.Birth))
                   {
                     if (marriage != null)
                     {
@@ -1404,25 +1458,6 @@ namespace FamilyStudioData.FamilyTreeStore
                     if (birth.GetDate().GetDateType() != FamilyDateTimeClass.FamilyDateType.Year)
                     {
                       birthDateList.Add(birth.GetDate().ToDateTime());
-                    }
-                    if (marriage == null)
-                    {
-                      trace.TraceInformation(" Missing marriage date " + family.GetXrefName());
-                      RelationStack stack = relationStack.Duplicate();
-                      if (mother != null)
-                      {
-                        String extension = "where this is the mother";
-                        CheckAndAddRelation(ref stack, family, mother.person);
-                        if ((father != null) && (father.person != null))
-                        {
-                          extension = "with " + father.person.GetName();
-                        }
-                        AddToList(mother.person.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.missingWeddingDate_e, "Missing marriage date in family " + extension);
-                      } else if (father != null)
-                      {
-                        CheckAndAddRelation(ref stack, family, father.person);
-                        AddToList(father.person.GetXrefName(), stack, depth, SanityCheckLimits.SanityProblemId.missingWeddingDate_e, "Missing marriage date in family where this is the father");
-                      }
                     }
                     if ((mother.death != DateTime.MinValue) && (ToYears(mother.death - birth.GetDate().ToDateTime()) < 0))
                     {
@@ -1921,21 +1956,30 @@ namespace FamilyStudioData.FamilyTreeStore
       }
     }
 
-    private string Linefeed()
+    private string Linefeed(bool html = false)
     {
+      if (html)
+      {
+        return "<br/>" + FamilyUtility.GetLinefeed();
+      }
       return FamilyUtility.GetLinefeed();
     }
 
-    override public string ToString()
+    public string ToString(bool html)
     {
       StringBuilder builder = new StringBuilder();
       //ancestorList.OrderBy<int, depth>();
 
-      builder.Append("Analysis started at " + startTime + " done at " + endTime + Linefeed());
-      builder.Append("Ancestor overview:" + Linefeed());
-      builder.Append("  analysed " + people + " people   " + duplicatePeople + " more than once" + Linefeed());
-      builder.Append("  analysed " + families + " families " + duplicateFamilies + " more than once" + Linefeed());
-      builder.Append("  roots    " + ancestorList.Count + Linefeed());
+      if (html)
+      {
+        builder.Append("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"/><title> List of profile problems </title ></head ><body>" + Linefeed());
+      }
+
+      builder.Append("Analysis started at " + startTime + " done at " + endTime + Linefeed(html));
+      builder.Append("Ancestor overview:" + Linefeed(html));
+      builder.Append("  analysed " + people + " people   " + duplicatePeople + " more than once" + Linefeed(html));
+      builder.Append("  analysed " + families + " families " + duplicateFamilies + " more than once" + Linefeed(html));
+      builder.Append("  roots    " + ancestorList.Count + Linefeed(html));
       //trace.TraceInformation("  max children: " + maxNoOfChildren+ " parents " + maxNoOfParents);
       //familyTree.Print();
 
@@ -1943,35 +1987,39 @@ namespace FamilyStudioData.FamilyTreeStore
         IEnumerable<AncestorLineInfo> query = ancestorList.Values.OrderBy(ancestor => ancestor.depth);
 
 
-        builder.Append("Roots:" + Linefeed());
+        builder.Append("Roots:" + Linefeed(html));
         foreach (AncestorLineInfo root in query)
         {
           IndividualClass person = familyTree.GetIndividual(root.rootAncestor);
           //str += root.depth + " generations: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death) + Linefeed();
-          builder.Append(root.GetDetailString(limits) + Linefeed());
-          builder.Append(root.relationPath.ToString(familyTree) + Linefeed());
+          builder.Append(root.GetDetailString(limits) + Linefeed(html));
+          builder.Append(root.relationPath.ToString(familyTree, html) + Linefeed(html));
         }
       }
       {
         IEnumerable<HandledItem> query = analysedPeopleNo.OrderByDescending(ancestor => ancestor.number);
 
-        builder.Append("Multiply Referenced: " + query.Count<HandledItem>() + " items" + Linefeed());
+        builder.Append("Multiply Referenced: " + query.Count<HandledItem>() + " items" + Linefeed(html));
         foreach (HandledItem item in query)
         {
           IndividualClass person = familyTree.GetIndividual(item.xref);
           if (item.number > 1)
           {
-            builder.Append("Referenced " + item.number + " times: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death) + Linefeed());
+            builder.Append("Referenced " + item.number + " times: " + person.GetName() + " " + person.GetDate(IndividualEventClass.EventType.Birth) + " - " + person.GetDate(IndividualEventClass.EventType.Death) + Linefeed(html));
             //str += root.relationPath.ToString(familyTree) + Linefeed();
             foreach (RelationStack stack in item.relationStackList)
             {
               if (stack != null)
               {
-                builder.Append(" " + stack.ToString(familyTree) + Linefeed());
+                builder.Append(" " + stack.ToString(familyTree, html) + Linefeed(html));
               }
             }
           }
         }
+      }
+      if (html)
+      {
+        builder.Append("</body></html>" + Linefeed());
       }
       return builder.ToString();
     }
@@ -2003,17 +2051,18 @@ namespace FamilyStudioData.FamilyTreeStore
 
           IList<string> urls = person.GetUrlList();
 
+          builder.Append("<tr><td>");
+
           if (urls.Count > 0)
-          {
-            builder.Append("<tr><td><a href=\"" + urls[0] + "\">" + person.GetName() + "</a></td>" + 
-              "<td>" + GetEventDateString(person, IndividualEventClass.EventType.Birth) + "</td>"+
-              "<td>" + GetEventDateString(person, IndividualEventClass.EventType.Death) + "</td><td>" + root.GetDetailString(limits) + "</td><td>");
+          { 
+            builder.Append("<a href=\"" + urls[0] + "\">" + person.GetName() + "</a>");
           }
           else
           {
-            builder.Append("<tr><td>" + person.GetName() + "</td><td>" + GetEventDateString(person, IndividualEventClass.EventType.Birth) + "</td><td>" 
-              + GetEventDateString(person, IndividualEventClass.EventType.Death) + "</td><td>" + root.GetDetailString(limits) + "</td><td>");
+            builder.Append(person.GetName());
           }
+          builder.Append("</td><td>" + GetEventDateString(person, IndividualEventClass.EventType.Birth) + "</td><td>"
+          + GetEventDateString(person, IndividualEventClass.EventType.Death) + "</td><td>" + root.GetDetailString(limits) + "</td><td>");
 
           int dupIx = 1;
           foreach (string url in root.duplicate)
@@ -2214,8 +2263,8 @@ namespace FamilyStudioData.FamilyTreeStore
                   {
                     duplicate = true;
                     trace.TraceInformation("Don't add this. Duplicate of number " + i);
-                    trace.TraceInformation(person1enum.Current.Value.ToString(familyTree));
-                    trace.TraceInformation(person2enum.Current.Value.ToString(familyTree));
+                    trace.TraceInformation(person1enum.Current.Value.ToString(familyTree, false));
+                    trace.TraceInformation(person2enum.Current.Value.ToString(familyTree, false));
                   }
                 }
                 if(!duplicate)
@@ -2224,8 +2273,8 @@ namespace FamilyStudioData.FamilyTreeStore
                   person1verified.Add(person1enum.Current.Value);
                   person2verified.Add(person2enum.Current.Value);
 
-                  trace.TraceInformation(person1enum.Current.Value.ToString(familyTree));
-                  trace.TraceInformation(person2enum.Current.Value.ToString(familyTree));
+                  trace.TraceInformation(person1enum.Current.Value.ToString(familyTree, false));
+                  trace.TraceInformation(person2enum.Current.Value.ToString(familyTree, false));
                 }
 
               }
@@ -2252,26 +2301,26 @@ namespace FamilyStudioData.FamilyTreeStore
                     printStack.Add(new Relation(InvertRelation(person2verified[i][j].type), person2verified[i][j].personXref));
                   }
                 }
-                trace.TraceInformation(printStack.ToString(familyTree));
-                trace.TraceInformation(printStack.CalculateRelation(familyTree));
+                trace.TraceInformation(printStack.ToString(familyTree, false));
+                trace.TraceInformation(printStack.CalculateRelation(familyTree, false));
                 if (relationList != null)
                 {
                   relationList.relations.Add(printStack.Duplicate());
-                  trace.TraceInformation("Add:" + printStack.CalculateRelation(familyTree));
+                  trace.TraceInformation("Add:" + printStack.CalculateRelation(familyTree, false));
                 }
               }
               else
               {
                 trace.TraceEvent(TraceEventType.Error, 0, "error: " + person1verified[i][person1verified[i].Count - 1].personXref + "!=" + person2verified[i][person2verified[i].Count - 1].personXref);
-                trace.TraceEvent(TraceEventType.Error, 0, person1verified[i].ToString(familyTree));
-                trace.TraceEvent(TraceEventType.Error, 0, person2verified[i].ToString(familyTree));
+                trace.TraceEvent(TraceEventType.Error, 0, person1verified[i].ToString(familyTree, false));
+                trace.TraceEvent(TraceEventType.Error, 0, person2verified[i].ToString(familyTree, false));
               }
             }
             else
             {
               trace.TraceEvent(TraceEventType.Error, 0, "error: " + person1verified[i].Count + " or " + person2verified[i].Count + " < 2");
-              trace.TraceEvent(TraceEventType.Error, 0, person1verified[i].ToString(familyTree));
-              trace.TraceEvent(TraceEventType.Error, 0, person2verified[i].ToString(familyTree));
+              trace.TraceEvent(TraceEventType.Error, 0, person1verified[i].ToString(familyTree, false));
+              trace.TraceEvent(TraceEventType.Error, 0, person2verified[i].ToString(familyTree, false));
             }
           }
         }

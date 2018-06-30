@@ -2441,16 +2441,16 @@ namespace FamilyStudioData.FileFormats.GedcomCodec
                           switch (subLineData.valueString)
                           {
                             case "adopted":
-                              relationXref.SetPedigreeType(FamilyXrefClass.PedigreeType.Adopted);
+                              relationXref.SetPedigreeType(PedigreeType.Adopted);
                               break;
                             case "birth":
-                              relationXref.SetPedigreeType(FamilyXrefClass.PedigreeType.Birth);
+                              relationXref.SetPedigreeType(PedigreeType.Birth);
                               break;
                             case "foster":
-                              relationXref.SetPedigreeType(FamilyXrefClass.PedigreeType.Foster);
+                              relationXref.SetPedigreeType(PedigreeType.Foster);
                               break;
                             case "sealing":
-                              relationXref.SetPedigreeType(FamilyXrefClass.PedigreeType.Sealing);
+                              relationXref.SetPedigreeType(PedigreeType.Sealing);
                               break;
                             default:
                               DebugStringAdd("Line: " + subLineData.lineNo + ": Unknown INDI.FAMC.PEDI type:" + subLineData.valueString);
@@ -2518,16 +2518,16 @@ namespace FamilyStudioData.FileFormats.GedcomCodec
                           switch (subLineData.valueString)
                           {
                             case "adopted":
-                              relationXref.SetPedigreeType(FamilyXrefClass.PedigreeType.Adopted);
+                              relationXref.SetPedigreeType(PedigreeType.Adopted);
                               break;
                             case "birth":
-                              relationXref.SetPedigreeType(FamilyXrefClass.PedigreeType.Birth);
+                              relationXref.SetPedigreeType(PedigreeType.Birth);
                               break;
                             case "foster":
-                              relationXref.SetPedigreeType(FamilyXrefClass.PedigreeType.Foster);
+                              relationXref.SetPedigreeType(PedigreeType.Foster);
                               break;
                             case "sealing":
-                              relationXref.SetPedigreeType(FamilyXrefClass.PedigreeType.Sealing);
+                              relationXref.SetPedigreeType(PedigreeType.Sealing);
                               break;
                             default:
                               DebugStringAdd("Line: " + subLineData.lineNo + ": Unknown " + tagStack.GetTagStack() + " type:" + subLineData.valueString);

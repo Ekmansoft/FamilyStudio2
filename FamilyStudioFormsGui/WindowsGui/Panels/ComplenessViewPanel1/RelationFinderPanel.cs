@@ -112,14 +112,19 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
       ToolStripItem saveItem = new ToolStripMenuItem();
       saveItem.Text = "Save...";
       saveItem.MouseUp += ContextMenuStrip_SelectSave;
-      ToolStripItem exportItem = new ToolStripMenuItem();
-      exportItem.Text = "Export...";
-      exportItem.MouseUp += ContextMenuStrip_SelectExport;
+      ToolStripItem exportItemText = new ToolStripMenuItem();
+      exportItemText.Text = "Export text...";
+      exportItemText.MouseUp += ContextMenuStrip_SelectExportText;
+
+      ToolStripItem exportItemHtml = new ToolStripMenuItem();
+      exportItemHtml.Text = "Export HTML...";
+      exportItemHtml.MouseUp += ContextMenuStrip_SelectExportHtml;
 
       //matchListView1.ContextMenuStrip.Items.Add("Open");
       resultList.ContextMenuStrip.Items.Add(openItem);
       resultList.ContextMenuStrip.Items.Add(saveItem);
-      resultList.ContextMenuStrip.Items.Add(exportItem);
+      resultList.ContextMenuStrip.Items.Add(exportItemText);
+      resultList.ContextMenuStrip.Items.Add(exportItemHtml);
 
       utility = new FamilyUtility();
 
@@ -172,11 +177,23 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
       }
     }
 
-    void ContextMenuStrip_SelectExport(object sender, MouseEventArgs e)
+    void ContextMenuStrip_SelectExportText(object sender, MouseEventArgs e)
     {
       if (relationList != null)
       {
-        ExportListContents(relationList);
+        ExportListContents(relationList, false);
+      }
+      else
+      {
+        MessageBox.Show("Error", "No list to save");
+      }
+    }
+
+    void ContextMenuStrip_SelectExportHtml(object sender, MouseEventArgs e)
+    {
+      if (relationList != null)
+      {
+        ExportListContents(relationList, true);
       }
       else
       {
@@ -230,15 +247,23 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
       }
     }
 
-    private void ExportListContents(RelationStackList relationList)
+    private void ExportListContents(RelationStackList relationList, bool html)
     {
       SaveFileDialog fileDlg = new SaveFileDialog();
-      fileDlg.Filter = "Relation List|*.txt";
+
+      if (html)
+      {
+        fileDlg.Filter = "Relation List|*.html";
+      }
+      else
+      {
+        fileDlg.Filter = "Relation List|*.txt";
+      }
       fileDlg.InitialDirectory = utility.GetCurrentDirectory();
 
       if (fileDlg.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
       {
-        ExportListToFile(fileDlg.FileName, relationList);
+        ExportListToFile(fileDlg.FileName, relationList, html);
       }
     }
 
@@ -260,11 +285,11 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
       }
     }
 
-    private void ExportListToFile(string filename, RelationStackList relationList)
+    private void ExportListToFile(string filename, RelationStackList relationList, bool html)
     {
       StreamWriter exportFile = new StreamWriter(filename);
 
-      exportFile.Write(relationList.ToString(familyTree));
+      exportFile.Write(relationList.ToString(familyTree, html));
 
       exportFile.Close();
     }
@@ -306,11 +331,11 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.RelationFinderPanel
       {
         foreach (RelationStack rel in relations.relations)
         {
-          TreeNode treeRel = new TreeNode(rel.CalculateRelation(familyTree));
+          TreeNode treeRel = new TreeNode(rel.CalculateRelation(familyTree, false));
 
           foreach (Relation relative in rel)
           {
-            TreeNode person = new TreeNode(relative.ToString(familyTree));
+            TreeNode person = new TreeNode(relative.ToString(familyTree, true, false));
 
             person.Tag = relative.personXref;
             treeRel.Nodes.Add(person);

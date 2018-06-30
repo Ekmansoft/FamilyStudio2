@@ -428,6 +428,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<SubmitterXrefClass> GetSubmitterList(string submitterFilter = null)
     {
+      if (submitterList == null)
+      {
+        return new List<SubmitterXrefClass>();
+      }
       return submitterList;
     }
 
@@ -442,6 +446,10 @@ namespace FamilyStudioData.FamilyData
 
     public IList<String> GetPermanentRFNList()
     {
+      if (permanentRFN_List == null)
+      {
+        return new List<String>();
+      }
       return permanentRFN_List;
     }
 
@@ -456,6 +464,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<NoteXrefClass> GetNoteXrefList(string noteFilter = null)
     {
+      if (noteXrefList == null)
+      {
+        return new List<NoteXrefClass>();
+      }
       return noteXrefList;
     }
 
@@ -470,6 +482,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<NoteClass> GetNoteList(string noteFilter = null)
     {
+      if (noteList == null)
+      {
+        return new List<NoteClass>();
+      }
       return noteList;
     }
 
@@ -540,6 +556,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<SourceDescriptionClass> GetSourceList(string sourceFilter = null)
     {
+      if (sourceList == null)
+      {
+        return new List<SourceDescriptionClass>();
+      }
       return sourceList;
     }
     public void AddSourceXref(SourceXrefClass source)
@@ -552,6 +572,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<SourceXrefClass> GetSourceXrefList()
     {
+      if (sourceXrefList == null)
+      {
+        return new List<SourceXrefClass>();
+      }
       return sourceXrefList;
     }
     public void SetSpecialRecordId(IndividualSpecialRecordIdType type, String recordId)
@@ -708,6 +732,10 @@ namespace FamilyStudioData.FamilyData
 
     public IList<FamilyXrefClass> GetFamilyChildList()
     {
+      if (familyChildList == null)
+      {
+        return new List<FamilyXrefClass>();
+      }
       return familyChildList;
     }
 
@@ -718,6 +746,10 @@ namespace FamilyStudioData.FamilyData
 
     public IList<FamilyXrefClass> GetFamilySpouseList()
     {
+      if (familySpouseList == null)
+      {
+        return new List<FamilyXrefClass>();
+      }
       return familySpouseList;
     }
     public void SetFamilySpouseList(IList<FamilyXrefClass> spouseList)
@@ -895,12 +927,17 @@ namespace FamilyStudioData.FamilyData
   public class IndividualXrefClass : BaseXrefClass
   {
     //private static TraceSource trace = new TraceSource("IndividualXrefClass", SourceLevels.Warning);
-    //[DataMember]
-    //public String xrefName;
+    [DataMember]
+    private PedigreeType pedigreeType;
 
-    public IndividualXrefClass(String name) : base(XrefType.Individual, name)
+    public IndividualXrefClass(String name, PedigreeType pedigreeType = PedigreeType.Birth) : base(XrefType.Individual, name)
     {
       //xrefName = name;
+      this.pedigreeType = pedigreeType;
+    }
+    public PedigreeType GetPedigreeType()
+    {
+      return this.pedigreeType;
     }
   }
 

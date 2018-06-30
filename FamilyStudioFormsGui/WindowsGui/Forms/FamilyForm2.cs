@@ -49,6 +49,7 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
     private IList<string> searchResultXrefList;
     //private IList<Type> typeList;
     private AddPersonForm m_addPersonForm;
+    private System.Windows.Forms.Timer updateTimer;
 
     public IList<IndividualFilterClass> filterList;
 
@@ -189,7 +190,35 @@ namespace FamilyStudioFormsGui.WindowsGui.Forms
 
         //ConnectPanelsToTree(familyTree);
       }
+      updateTimer = new System.Windows.Forms.Timer();
+      updateTimer.Tick += new EventHandler(TimerEventProcessor);
+      updateTimer.Interval = 1000 * 10; // 10 seconds
+      updateTimer.Enabled = true;
     }
+
+    // This is the method to run when the timer is raised.
+    private void TimerEventProcessor(Object myObject, EventArgs myEventArgs)
+    {
+      //updateTimer.Stop();
+
+      //updateTimer.Enabled = true;
+      if (!this.statusStrip1.InvokeRequired)
+      {
+        if (familyTree != null)
+        {
+          trace.TraceData(TraceEventType.Warning, 0, "Update timer expired:" + familyTree.GetShortTreeInfo() + toolStripStatusLabel1.Text + toolStripStatusLabel1.Visible);
+          if (!toolStripStatusLabel1.Visible)
+          {
+            toolStripStatusLabel1.Text = familyTree.GetShortTreeInfo();
+          }
+        }
+      } 
+      else
+      {
+        trace.TraceData(TraceEventType.Warning, 0, "invoke req ");
+      }
+    }
+
 
     private string ExtractFilename(string filename)
     {

@@ -8,6 +8,14 @@ using FamilyStudioData.FamilyTreeStore;
 
 namespace FamilyStudioData.FamilyData
 {
+  public enum PedigreeType
+  {
+    Adopted,
+    Birth,
+    Foster,
+    Sealing
+  };
+
   [DataContract]
   public class FamilyDateTimeClass
   {
@@ -443,6 +451,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<IndividualEventClass> GetEventList(IndividualEventClass.EventType requestedEventTypes = IndividualEventClass.EventType.AllEvents)
     {
+      if (familyEventList == null)
+      {
+        familyEventList = new List<IndividualEventClass>();
+      }
       return familyEventList;
     }
     public IndividualEventClass GetEvent(IndividualEventClass.EventType requestedEventType)
@@ -504,10 +516,18 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<NoteClass> GetNoteList(string noteFilter = null)
     {
+      if (noteList == null)
+      {
+        return new List<NoteClass>();
+      }
       return noteList;
     }
     public IList<NoteXrefClass> GetNoteXrefList()
     {
+      if (noteXrefList == null)
+      {
+        return new List<NoteXrefClass>();
+      }
       return noteXrefList;
     }
     public void AddSource(SourceDescriptionClass source)
@@ -520,6 +540,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<SourceDescriptionClass> GetSourceList(string sourceFilter = null)
     {
+      if (sourceList == null)
+      {
+        return new List<SourceDescriptionClass>();
+      }
       return sourceList;
     }
     public void AddSourceXref(SourceXrefClass sourceXref)
@@ -532,6 +556,10 @@ namespace FamilyStudioData.FamilyData
     }
     public IList<SourceXrefClass> GetSourceXrefList()
     {
+      if (sourceXrefList == null)
+      {
+        return new List<SourceXrefClass>();
+      }
       return sourceXrefList;
     }
 
@@ -639,10 +667,18 @@ namespace FamilyStudioData.FamilyData
 
     public IList<IndividualXrefClass> GetParentList()
     {
+      if (parentList == null)
+      {
+        return new List<IndividualXrefClass>();
+      }
       return parentList;
     }
     public IList<IndividualXrefClass> GetChildList()
     {
+      if(childList == null)
+      {
+        return new List<IndividualXrefClass>();
+      }
       return childList;
     }
 
@@ -676,14 +712,6 @@ namespace FamilyStudioData.FamilyData
   [DataContract]
   public class FamilyXrefClass : BaseXrefClass
   {
-    public enum PedigreeType
-    {
-      Unknown,
-      Adopted,
-      Birth,
-      Foster,
-      Sealing
-    };
     [DataMember]
     public IList<NoteClass> noteList;
     [DataMember]

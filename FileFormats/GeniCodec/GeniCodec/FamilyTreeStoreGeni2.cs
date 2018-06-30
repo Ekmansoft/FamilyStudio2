@@ -601,6 +601,8 @@ namespace FamilyStudioData.FileFormats.GeniCodec
       public string status { get; set; }
       public List<string> partners { get; set; }
       public List<string> children { get; set; }
+      public List<string> adopted_children { get; set; }
+      public List<string> foster_children { get; set; }
     }
 
     public class HttpMaxFamilyResponse
@@ -740,6 +742,17 @@ namespace FamilyStudioData.FileFormats.GeniCodec
           stats.GetIndividual.Print();
           trace.TraceData(TraceEventType.Warning, 0, "IOException: " + e.ToString());
           failure = true;
+        }
+        if ((returnLine != null) && ((returnLine.StartsWith("<!DOCTYPE") || returnLine.StartsWith("<HTML") || returnLine.StartsWith("<html"))))
+        {
+          trace.TraceData(TraceEventType.Warning, 0, requestDescription + ":Bad response format. Don't parse.");
+          trace.TraceData(TraceEventType.Warning, 0, "**********************************************************-start");
+          trace.TraceData(TraceEventType.Warning, 0, "{0}:{1}", returnLine.Length, returnLine);
+          trace.TraceData(TraceEventType.Warning, 0, "**********************************************************-end");
+          stats.GetIndividual.failureRetry++;
+          trace.TraceData(TraceEventType.Warning, 0, requestDescription + " " + sURL + " FAILURE " + retryCount + "/" + numberOfRetries);
+          failure = true;
+          Thread.Sleep(10000);
         }
       } while (failure && (retryCount++ < numberOfRetries));
 
@@ -939,13 +952,47 @@ namespace FamilyStudioData.FileFormats.GeniCodec
               family.AddRelation(new IndividualXrefClass(partner.Substring(startPos)), FamilyClass.RelationType.Parent);
             }
           }
+          IList<string> fosterChildren = new List<string>();
+          IList<string> adoptedChildren = new List<string>();
+          if (familyResponse.adopted_children != null)
+          {
+            foreach (string child in familyResponse.adopted_children)
+            {
+              int startPos = child.IndexOf("profile-");
+              // ignore "profile-" = 8 characters
+              //family.AddRelation(new IndividualXrefClass(child.Substring(startPos)), FamilyClass.RelationType.Child);
+              adoptedChildren.Add(child.Substring(startPos));
+            }
+          }
+          if (familyResponse.foster_children != null)
+          {
+            foreach (string child in familyResponse.foster_children)
+            {
+              int startPos = child.IndexOf("profile-");
+              // ignore "profile-" = 8 characters
+              //family.AddRelation(new IndividualXrefClass(child.Substring(startPos)), FamilyClass.RelationType.Child);
+              adoptedChildren.Add(child.Substring(startPos));
+            }
+          }
           if (familyResponse.children != null)
           {
             foreach (string child in familyResponse.children)
             {
               int startPos = child.IndexOf("profile-");
               // ignore "profile-" = 8 characters
-              family.AddRelation(new IndividualXrefClass(child.Substring(startPos)), FamilyClass.RelationType.Child);
+
+              if (adoptedChildren.IndexOf(child.Substring(startPos)) >= 0)
+              {
+                family.AddRelation(new IndividualXrefClass(child.Substring(startPos), PedigreeType.Adopted), FamilyClass.RelationType.Child);
+              }
+              else if (fosterChildren.IndexOf(child.Substring(startPos)) >= 0)
+              {
+                family.AddRelation(new IndividualXrefClass(child.Substring(startPos), PedigreeType.Foster), FamilyClass.RelationType.Child);
+              }
+              else
+              {
+                family.AddRelation(new IndividualXrefClass(child.Substring(startPos)), FamilyClass.RelationType.Child);
+              }
             }
           }
           if (family.GetXrefName() != "")
