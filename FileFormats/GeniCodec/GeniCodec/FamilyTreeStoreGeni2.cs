@@ -486,7 +486,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
 
     public class HttpSearchPersonResult
     {
-      public string prev_page{ get; set; }
+      public string prev_page { get; set; }
       public int page { get; set; }
       public string next_page { get; set; }
       public List<HttpPerson> results { get; set; }
@@ -1723,6 +1723,7 @@ namespace FamilyStudioData.FileFormats.GeniCodec
           int index = 0;
           while (personIterator.MoveNext())
           {
+            trace.TraceInformation("SearchPerson():add from cache " + personIterator.Current);
             personList.Add(personIterator.Current);
             stats.SearchIndividual.fetchSuccess++;
           }
@@ -1761,8 +1762,15 @@ namespace FamilyStudioData.FileFormats.GeniCodec
                 {
                   stats.SearchIndividual.fetchSuccess++;
                   handledResults++;
+                  trace.TraceInformation("SearchPerson():add from web " + person);
                   yield return DecodeIndividual(person);
                 }
+              }
+              else
+              {
+                HttpPerson onePerson = serializer.Deserialize<HttpPerson>(sLine);
+                trace.TraceData(TraceEventType.Information, 0, "SearchPerson():add from web one single person " + onePerson);
+                yield return DecodeIndividual(onePerson);
               }
               trace.TraceEvent(TraceEventType.Information, 0, " successes " + stats.SearchIndividual.fetchSuccess);
             }
@@ -1872,11 +1880,13 @@ namespace FamilyStudioData.FileFormats.GeniCodec
       {
         IEnumerator<FamilyClass> familyIterator = cache.GetFamilyIterator();
 
+        trace.TraceInformation("SearchFamily():start:");
         if (familyIterator != null)
         {
           List<FamilyClass> familyList = new List<FamilyClass>();
           while (familyIterator.MoveNext())
           {
+            trace.TraceInformation("SearchFamily():add:" + familyIterator.Current);
             familyList.Add(familyIterator.Current);
           }
           foreach(FamilyClass family in familyList)

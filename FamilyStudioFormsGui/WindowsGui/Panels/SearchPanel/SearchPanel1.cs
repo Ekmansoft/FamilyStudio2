@@ -25,6 +25,8 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.SearchPanel1
     private Button startButton;
     private ListView resultList;
     private TraceSource trace;
+    private AsyncWorkerProgress progressReporter;
+    private TreeWorker treeWorker;
 
     public SearchPanel1()
     {
@@ -141,6 +143,83 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.SearchPanel1
       }
     }
 
+
+    void AddPersonToListView(IndividualClass person)
+    {
+      string birthAddress = "";
+      string deathAddress = "";
+      IndividualEventClass birthEv = person.GetEvent(IndividualEventClass.EventType.Birth);
+      if (birthEv != null)
+      {
+        AddressClass address = birthEv.GetAddress();
+        if (address != null)
+        {
+          birthAddress = address.ToString();
+        }
+      }
+      IndividualEventClass deathEv = person.GetEvent(IndividualEventClass.EventType.Death);
+      if (deathEv != null)
+      {
+        AddressClass address = deathEv.GetAddress();
+        if (address != null)
+        {
+          deathAddress = address.ToString();
+        }
+      }
+
+      ListViewItem item = new ListViewItem(person.GetName());
+      item.SubItems.AddRange(new string[] { person.GetDate(IndividualEventClass.EventType.Birth).ToString(), birthAddress, person.GetDate(IndividualEventClass.EventType.Death).ToString(), deathAddress});
+      item.Tag = person.GetXrefName();
+
+      resultList.Items.Add(item);
+    }
+
+
+    void AddToSearchResults(IndividualClass person)
+    {
+      if (resultList.InvokeRequired)
+      {
+        Invoke(new Action(() => AddPersonToListView(person)));
+      }
+      else
+      {
+        AddPersonToListView(person);
+      }
+    }
+
+    void SearchTree(FamilyTreeStoreBaseClass familyTree, String searchString)
+    {
+      IEnumerator<IndividualClass> iterator;
+
+
+      iterator = familyTree.SearchPerson(searchString, progressReporter);
+
+      if (iterator != null)
+      {
+        while (iterator.MoveNext())
+        {
+          IndividualClass person = (IndividualClass)iterator.Current;
+
+          if (person != null)
+          {
+            AddToSearchResults(person);
+          }
+        }
+      }
+    }
+
+    public void SearchProgress(int progressPercent, string text = null)
+    {
+      trace.TraceInformation("SearchPanel1::SearchProgress(" + progressPercent + ")");
+      parentForm.TextCallback(progressPercent, text);
+
+      if (progressPercent < 0)
+      {
+        startButton.Text = "Search";
+        startButton.Enabled = true;
+      }
+    }
+
     void StartSearch()
     {
       trace.TraceInformation("SearchPanel1::StartSearch()" + DateTime.Now);
@@ -155,8 +234,6 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.SearchPanel1
 
       if (searchTextBox.Text.Length > 0)
       {
-        IEnumerator<IndividualClass> iterator;
-
         resultList.Items.Clear();
         if (searchTextBox.FindStringExact(searchTextBox.Text) == -1)
         {
@@ -167,47 +244,17 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.SearchPanel1
 
         searchTextBox.Items.Add(searchTextBox.Text);
 
-        iterator = familyTree.SearchPerson(searchTextBox.Text);
+        progressReporter = new AsyncWorkerProgress(SearchProgress);
 
-        if (iterator != null)
-        {
-          while (iterator.MoveNext())
-          {
-            IndividualClass person = (IndividualClass)iterator.Current;
+        //stats = new AncestorStatistics(familyTree, limits, ancestorGenerations, descendantGenerationNo, progressReporter, AncestorUpdate);
+        //trace.TraceInformation("selected:" + searchTextBox.Text + " " + DateTime.Now);
 
-            if (person != null)
-            {
-              string birthAddress = "";
-              string deathAddress = "";
-              IndividualEventClass birthEv = person.GetEvent(IndividualEventClass.EventType.Birth);
-              if(birthEv != null)
-              {
-                AddressClass address = birthEv.GetAddress();
-                if(address != null)
-                {
-                  birthAddress = address.ToString();
-                }
-              }
-              IndividualEventClass deathEv = person.GetEvent(IndividualEventClass.EventType.Death);
-              if(deathEv != null)
-              {
-                AddressClass address = deathEv.GetAddress();
-                if(address != null)
-                {
-                  deathAddress = address.ToString();
-                }
-              }
-              ListViewItem item = new ListViewItem(person.GetName());
-              item.SubItems.AddRange(new string[] { person.GetDate(IndividualEventClass.EventType.Birth).ToString(), birthAddress, person.GetDate(IndividualEventClass.EventType.Death).ToString(), deathAddress });
-              item.Tag = person.GetXrefName();
 
-              resultList.Items.Add(item);
+        treeWorker = new TreeWorker(this, progressReporter, searchTextBox.Text, ref familyTree);
 
-            }
-          }
-        }
-        startButton.Text = "Search";
-        startButton.Enabled = true;
+
+        startButton.Text = "Searching...";
+        startButton.Enabled = false;
       }
       trace.TraceInformation(" Database: " + familyTree.GetSourceFileName() + "  " + DateTime.Now);
     }
@@ -268,12 +315,78 @@ namespace FamilyStudioFormsGui.WindowsGui.Panels.SearchPanel1
 
     }
 
+    private class TreeWorker : AsyncWorkerProgressInterface
+    {
+      private BackgroundWorker backgroundWorker;
+      private DateTime startTime;
+      FamilyTreeStoreBaseClass familyTree;
+      ProgressReporterInterface progressReporter;
+      string searchString;
+      private TraceSource trace;
+      private SearchPanel1 parentWindow;
 
+      public TreeWorker(
+        SearchPanel1 sender,
+        ProgressReporterInterface progress,
+        string searchString,
+        ref FamilyTreeStoreBaseClass familyTree)
+      {
+        trace = new TraceSource("TreeWorker", SourceLevels.Warning);
+        parentWindow = sender;
 
+        progressReporter = progress;
+        this.familyTree = familyTree;
+        this.searchString = searchString;
+
+        backgroundWorker = new BackgroundWorker();
+
+        backgroundWorker.WorkerReportsProgress = true;
+        backgroundWorker.DoWork += new DoWorkEventHandler(DoWork);
+        backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Completed);
+        backgroundWorker.ProgressChanged += new ProgressChangedEventHandler(ProgressChanged);
+
+        backgroundWorker.RunWorkerAsync(searchString);
+
+      }
+
+      public void DoWork(object sender, DoWorkEventArgs e)
+      {
+
+        // This method will run on a thread other than the UI thread.
+        // Be sure not to manipulate any Windows Forms controls created
+        // on the UI thread from this method.
+        startTime = DateTime.Now;
+
+        parentWindow.SearchTree(familyTree, searchString);
+
+        trace.TraceInformation("TreeWorker::DoWork(" + ")" + DateTime.Now);
+      }
+
+      public void ProgressChanged(object sender, ProgressChangedEventArgs e)
+      {
+        trace.TraceInformation("TreeWorker::ProgressChanged(" + e.ProgressPercentage + ")" + DateTime.Now);
+
+        progressReporter.ReportProgress(e.ProgressPercentage, familyTree.GetShortTreeInfo());
+      }
+      public void Completed(object sender, RunWorkerCompletedEventArgs e)
+      {
+        trace.TraceInformation("TreeWorker::Completed()" + DateTime.Now);
+        trace.TraceInformation("  Start time:" + startTime + " end time: " + DateTime.Now);
+
+        progressReporter.Completed(familyTree.GetShortTreeInfo());
+      }
+
+      public void Dispose()
+      {
+        backgroundWorker.DoWork -= new DoWorkEventHandler(DoWork);
+        backgroundWorker.RunWorkerCompleted -= new RunWorkerCompletedEventHandler(Completed);
+        backgroundWorker.ProgressChanged -= new ProgressChangedEventHandler(ProgressChanged);
+        backgroundWorker.Dispose();
+      }
+    }
 
 
 
   }
-
 
 }
