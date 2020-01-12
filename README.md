@@ -1,6 +1,7 @@
 # FamilyStudio2
-Genealogy software based on dotnet and written in C# 
-(This code contains an older version of the code found in FamilyTreeLibrary, FamilyTreeCodecXxx and FamilyTreeTools, but has a Windows GUI for handling trees in a Windows application)
+Older genealogy software based on dotnet and written in C# 
+
+This contains an older version of the code found in FamilyTreeLibrary, FamilyTreeCodecXxx and FamilyTreeTools, but has a Windows GUI for handling trees in a Windows application, which is not included in the newer code
 
 # Introduction
 FamilyStudio2 is a piece of software for handling your family tree research written for dotnet in C#.
